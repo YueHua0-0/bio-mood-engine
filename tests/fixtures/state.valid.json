@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "engine_version": "0.1.0",
+  "character_id": "whale_character",
+  "state_version": 42,
+  "created_at": "2026-11-01T00:00:00.000Z",
+  "updated_at": "2026-11-09T04:48:00.000Z",
+  "last_tick_at": "2026-11-09T04:48:00.000Z",
+  "timezone": "Asia/Shanghai",
+  "config_version": 1,
+  "cycle": {
+    "anchor_at": "2026-10-18T00:00:00.000Z",
+    "cycle_index": 0,
+    "cycle_length_days": 28.4,
+    "cycle_length_source": "sampled",
+    "cycle_day": 23.2,
+    "phase": "luteal_like",
+    "phase_started_at": "2026-11-03T00:00:00.000Z",
+    "phase_progress": 0.52,
+    "confidence": 0.72,
+    "model_version": 1
+  },
+  "sleep": {
+    "state": "awake",
+    "state_since": "2026-11-08T23:35:00.000Z",
+    "sleep_started_at": "2026-11-08T15:40:00.000Z",
+    "last_wake_at": "2026-11-08T23:35:00.000Z",
+    "planned_wake_at": "2026-11-08T23:30:00.000Z",
+    "sleep_debt": 0.28,
+    "sleep_quality": 0.68,
+    "sleepiness": 0.34,
+    "circadian_phase": 0.72,
+    "interruption_count": 1,
+    "recovery_progress": 1,
+    "last_transition_reason": "woke_naturally"
+  },
+  "stress": {
+    "level": 0.24,
+    "active_events": [
+      {
+        "event_id": "evt_20261109_ab12cd34",
+        "event_type": "mention",
+        "started_at": "2026-11-09T04:40:00.000Z",
+        "intensity": 0.08,
+        "remaining": 0.05,
+        "decay_profile": "medium",
+        "source_key": "wechat:group_123:sender_a1"
+      }
+    ],
+    "last_decay_at": "2026-11-09T04:48:00.000Z",
+    "last_event_at": "2026-11-09T04:40:00.000Z",
+    "model_version": 1
+  },
+  "regulation": {
+    "reward_sensitivity": 0.5,
+    "arousal": 0.4,
+    "threat_sensitivity": 0.5,
+    "calm_regulation": 0.6,
+    "social_reassurance_drive": 0.5,
+    "fatigue_load": 0.3,
+    "model_version": 1
+  },
+  "mood": {
+    "energy": 0.42,
+    "stability": 0.67,
+    "sensitivity": 0.58,
+    "social_drive": 0.36,
+    "stress": 0.24,
+    "physical_comfort": 0.74,
+    "closeness_need": 0.61,
+    "model_version": 1
+  },
+  "random": {
+    "algorithm": "pcg32",
+    "algorithm_version": 1,
+    "master_seed_hex": "000102030405060708090a0b0c0d0e0f",
+    "streams": {
+      "cycle": { "seed_hex": "764d289e285a86b68df58ef666b4c9ab", "counter": 12 },
+      "sleep": { "seed_hex": "2a335db9e807acd15ced81dd3d031dd0", "counter": 9 },
+      "mood": { "seed_hex": "ecf6bd05e6e6f015b0a1d365b8c07051", "counter": 37 },
+      "event": { "seed_hex": "9398027bcf759ae763ab788570dbeb47", "counter": 4 },
+      "delivery": { "seed_hex": "09a2ee87bac47513794a69b42e3b6e80", "counter": 2 }
+    }
+  }
+}

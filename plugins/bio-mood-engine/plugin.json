@@ -1,0 +1,57 @@
+{
+  "id": "bio-mood-engine",
+  "name": "生理情绪模拟引擎（虚构）",
+  "version": "0.1.3",
+  "apiVersion": 2,
+  "host": "wechatagent",
+  "description": "为微信角色提供虚构的生理周期与情绪状态模拟，仅供角色行为倾向提示，不用于诊断、治疗或现实健康预测。",
+  "permissions": ["storage", "history_read", "reply"],
+  "settings": {
+    "enabled": true,
+    "primaryChatId": "",
+    "adminActorIds": "",
+    "characterId": "whale_character",
+    "timezone": "Asia/Shanghai",
+    "masterSeedHex": "",
+    "behaviorContextMaxChars": 800,
+    "debugLogging": false,
+    "shadowMode": false,
+    "engineMode": "embedded",
+    "engineRemoteUrl": "",
+    "engineRemoteToken": "",
+    "afterResponseMode": "off"
+  },
+  "configSchema": {
+    "enabled": { "type": "boolean", "title": "启用模拟引擎", "default": true },
+    "primaryChatId": {
+      "type": "string",
+      "title": "主聊天 ID（逗号分隔，最多 8 个）",
+      "description": "多个主会话共享同一个角色的引擎状态；这些聊天里模型都会看到情绪数值，observe/tick 也都会推进同一个 state。留空表示全部降级。",
+      "default": "",
+      "maxLength": 512
+    },
+    "adminActorIds": {
+      "type": "string",
+      "title": "管理员 wxid（逗号分隔）",
+      "description": "直接填宿主设置里看到的管理员 wxid（可带 wxid_ 前缀），多个用英文逗号分隔，最多 8 个；插件内部自行哈希，明文不落盘。留空表示不修改：沿用上一次填写的管理员。",
+      "default": "",
+      "maxLength": 512
+    },
+    "characterId": { "type": "string", "title": "角色 ID", "default": "whale_character", "maxLength": 64 },
+    "timezone": { "type": "string", "title": "角色时区", "default": "Asia/Shanghai", "maxLength": 64 },
+    "masterSeedHex": { "type": "string", "title": "主种子（留空自动生成）", "default": "", "secret": true, "maxLength": 128 },
+    "behaviorContextMaxChars": {
+      "type": "integer",
+      "title": "行为上下文最大字符数",
+      "default": 800,
+      "minimum": 200,
+      "maximum": 1500
+    },
+    "debugLogging": { "type": "boolean", "title": "调试日志", "default": false },
+    "shadowMode": { "type": "boolean", "title": "影子模式", "default": false },
+    "engineMode": { "type": "string", "title": "引擎模式", "default": "embedded", "enum": ["embedded", "remote"] },
+    "engineRemoteUrl": { "type": "string", "title": "远程引擎 URL", "default": "", "maxLength": 200 },
+    "engineRemoteToken": { "type": "string", "title": "远程引擎令牌", "default": "", "secret": true, "maxLength": 512 },
+    "afterResponseMode": { "type": "string", "title": "回复后处理模式", "default": "off", "enum": ["off", "protocol"] }
+  }
+}

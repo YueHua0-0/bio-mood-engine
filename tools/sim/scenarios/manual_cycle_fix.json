@@ -1,0 +1,435 @@
+{
+  "character_id": "sim_character",
+  "timezone": "Asia/Shanghai",
+  "master_seed_hex": "000102030405060708090a0b0c0d0e0f",
+  "step_seconds": 3600,
+  "config_overrides": {
+    "cycle": {
+      "base_days": 28
+    }
+  },
+  "assertions": {
+    "max_abs_delta_per_step": 0.15,
+    "mean_ranges": {
+      "mood.energy": [
+        0,
+        0.85
+      ],
+      "mood.stability": [
+        0.25,
+        0.9
+      ],
+      "stress.level": [
+        0.02,
+        0.65
+      ]
+    },
+    "no_edge_run_hours": 72
+  },
+  "scenario_id": "manual_cycle_fix",
+  "description": "60 天稀疏事件 + config.cycle.base_days=28：验证周期覆盖与手动校准路径。",
+  "start_at": "2026-11-01T00:00:00.000Z",
+  "end_at": "2026-12-31T00:00:00.000Z",
+  "events": [
+    {
+      "at": "2026-11-01T12:00:00.000Z",
+      "event_id": "mcf-event-0-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T12:20:00.000Z",
+      "event_id": "mcf-event-0-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T12:00:00.000Z",
+      "event_id": "mcf-event-3-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T12:20:00.000Z",
+      "event_id": "mcf-event-3-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T12:00:00.000Z",
+      "event_id": "mcf-event-6-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T12:20:00.000Z",
+      "event_id": "mcf-event-6-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-10T12:00:00.000Z",
+      "event_id": "mcf-event-9-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-10T12:20:00.000Z",
+      "event_id": "mcf-event-9-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-13T12:00:00.000Z",
+      "event_id": "mcf-event-12-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-13T12:20:00.000Z",
+      "event_id": "mcf-event-12-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-16T12:00:00.000Z",
+      "event_id": "mcf-event-15-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-16T12:20:00.000Z",
+      "event_id": "mcf-event-15-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-19T12:00:00.000Z",
+      "event_id": "mcf-event-18-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-19T12:20:00.000Z",
+      "event_id": "mcf-event-18-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-22T12:00:00.000Z",
+      "event_id": "mcf-event-21-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-22T12:20:00.000Z",
+      "event_id": "mcf-event-21-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-25T12:00:00.000Z",
+      "event_id": "mcf-event-24-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-25T12:20:00.000Z",
+      "event_id": "mcf-event-24-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-28T12:00:00.000Z",
+      "event_id": "mcf-event-27-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-28T12:20:00.000Z",
+      "event_id": "mcf-event-27-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-01T12:00:00.000Z",
+      "event_id": "mcf-event-30-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-01T12:20:00.000Z",
+      "event_id": "mcf-event-30-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-04T12:00:00.000Z",
+      "event_id": "mcf-event-33-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-04T12:20:00.000Z",
+      "event_id": "mcf-event-33-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-07T12:00:00.000Z",
+      "event_id": "mcf-event-36-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-07T12:20:00.000Z",
+      "event_id": "mcf-event-36-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-10T12:00:00.000Z",
+      "event_id": "mcf-event-39-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-10T12:20:00.000Z",
+      "event_id": "mcf-event-39-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-13T12:00:00.000Z",
+      "event_id": "mcf-event-42-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-13T12:20:00.000Z",
+      "event_id": "mcf-event-42-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-16T12:00:00.000Z",
+      "event_id": "mcf-event-45-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-16T12:20:00.000Z",
+      "event_id": "mcf-event-45-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-19T12:00:00.000Z",
+      "event_id": "mcf-event-48-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-19T12:20:00.000Z",
+      "event_id": "mcf-event-48-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-22T12:00:00.000Z",
+      "event_id": "mcf-event-51-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-22T12:20:00.000Z",
+      "event_id": "mcf-event-51-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-25T12:00:00.000Z",
+      "event_id": "mcf-event-54-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-25T12:20:00.000Z",
+      "event_id": "mcf-event-54-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-28T12:00:00.000Z",
+      "event_id": "mcf-event-57-a",
+      "event_type": "group_message",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_a",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-12-28T12:20:00.000Z",
+      "event_id": "mcf-event-57-b",
+      "event_type": "important_person_appear",
+      "conversation_id": "sim_mcf",
+      "sender_id": "sim_sender_important",
+      "relationship_tag": "important",
+      "is_mentioned": false,
+      "is_direct_question": false
+    }
+  ]
+}

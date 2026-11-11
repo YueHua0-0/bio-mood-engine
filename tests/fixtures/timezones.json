@@ -1,0 +1,70 @@
+{
+  "source": "IANA tzdb via Intl.DateTimeFormat (2026 transition instants, verified with longOffset)",
+  "zones": {
+    "Asia/Shanghai": {
+      "utc_offset": "+08:00",
+      "has_dst": false,
+      "transitions": []
+    },
+    "America/New_York": {
+      "utc_offset": "-05:00",
+      "has_dst": true,
+      "transitions": [
+        {
+          "at": "2026-03-08T07:00:00.000Z",
+          "offset_before": "-05:00",
+          "offset_after": "-04:00",
+          "local_hour_before": 1,
+          "local_hour_after": 3
+        },
+        {
+          "at": "2026-11-01T06:00:00.000Z",
+          "offset_before": "-04:00",
+          "offset_after": "-05:00",
+          "local_hour_before": 1,
+          "local_hour_after": 1
+        }
+      ]
+    },
+    "Europe/London": {
+      "utc_offset": "+00:00",
+      "has_dst": true,
+      "transitions": [
+        {
+          "at": "2026-03-29T01:00:00.000Z",
+          "offset_before": "+00:00",
+          "offset_after": "+01:00",
+          "local_hour_before": 0,
+          "local_hour_after": 2
+        },
+        {
+          "at": "2026-10-25T01:00:00.000Z",
+          "offset_before": "+01:00",
+          "offset_after": "+00:00",
+          "local_hour_before": 1,
+          "local_hour_after": 1
+        }
+      ]
+    },
+    "Australia/Sydney": {
+      "utc_offset": "+11:00",
+      "has_dst": true,
+      "transitions": [
+        {
+          "at": "2026-04-04T16:00:00.000Z",
+          "offset_before": "+11:00",
+          "offset_after": "+10:00",
+          "local_hour_before": 2,
+          "local_hour_after": 2
+        },
+        {
+          "at": "2026-10-03T16:00:00.000Z",
+          "offset_before": "+10:00",
+          "offset_after": "+11:00",
+          "local_hour_before": 1,
+          "local_hour_after": 3
+        }
+      ]
+    }
+  }
+}

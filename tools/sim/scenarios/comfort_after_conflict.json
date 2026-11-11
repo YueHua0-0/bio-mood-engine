@@ -1,0 +1,131 @@
+{
+  "character_id": "sim_character",
+  "timezone": "Asia/Shanghai",
+  "master_seed_hex": "000102030405060708090a0b0c0d0e0f",
+  "step_seconds": 3600,
+  "config_overrides": {},
+  "assertions": {
+    "max_abs_delta_per_step": 0.15,
+    "mean_ranges": {
+      "mood.energy": [
+        0,
+        0.85
+      ],
+      "mood.stability": [
+        0.25,
+        0.9
+      ],
+      "stress.level": [
+        0.02,
+        0.65
+      ]
+    },
+    "no_edge_run_hours": 72
+  },
+  "scenario_id": "comfort_after_conflict",
+  "description": "5 条冲突后 3 小时获得 5 条安慰：验证压力回落与情绪修复。",
+  "start_at": "2026-11-03T00:00:00.000Z",
+  "end_at": "2026-11-06T00:00:00.000Z",
+  "events": [
+    {
+      "at": "2026-11-03T02:00:00.000Z",
+      "event_id": "cac-conflict-0",
+      "event_type": "conflict",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_conflict",
+      "relationship_tag": "conflict",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T02:10:00.000Z",
+      "event_id": "cac-conflict-1",
+      "event_type": "conflict",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_conflict",
+      "relationship_tag": "conflict",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T02:20:00.000Z",
+      "event_id": "cac-conflict-2",
+      "event_type": "conflict",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_conflict",
+      "relationship_tag": "conflict",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T02:30:00.000Z",
+      "event_id": "cac-conflict-3",
+      "event_type": "conflict",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_conflict",
+      "relationship_tag": "conflict",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T02:40:00.000Z",
+      "event_id": "cac-conflict-4",
+      "event_type": "conflict",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_conflict",
+      "relationship_tag": "conflict",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:00:00.000Z",
+      "event_id": "cac-comfort-0",
+      "event_type": "comfort_received",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_intimate",
+      "relationship_tag": "intimate",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:10:00.000Z",
+      "event_id": "cac-comfort-1",
+      "event_type": "comfort_received",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_intimate",
+      "relationship_tag": "intimate",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:20:00.000Z",
+      "event_id": "cac-comfort-2",
+      "event_type": "comfort_received",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_intimate",
+      "relationship_tag": "intimate",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:30:00.000Z",
+      "event_id": "cac-comfort-3",
+      "event_type": "comfort_received",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_intimate",
+      "relationship_tag": "intimate",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:40:00.000Z",
+      "event_id": "cac-comfort-4",
+      "event_type": "comfort_received",
+      "conversation_id": "sim_cac",
+      "sender_id": "sim_sender_intimate",
+      "relationship_tag": "intimate",
+      "is_mentioned": false,
+      "is_direct_question": false
+    }
+  ]
+}

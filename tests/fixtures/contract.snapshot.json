@@ -1,0 +1,274 @@
+{
+  "contract_version": "v1.7.13",
+  "schema_version": 1,
+  "interface_version": 1,
+  "module_order": [
+    "cycle",
+    "sleep",
+    "stress",
+    "event",
+    "regulation",
+    "mood",
+    "behavior",
+    "delivery"
+  ],
+  "state_keys": [
+    "character_id",
+    "config_version",
+    "created_at",
+    "cycle",
+    "engine_version",
+    "last_tick_at",
+    "mood",
+    "random",
+    "regulation",
+    "schema_version",
+    "sleep",
+    "state_version",
+    "stress",
+    "timezone",
+    "updated_at"
+  ],
+  "state_sections": {
+    "cycle": [
+      "anchor_at",
+      "confidence",
+      "cycle_day",
+      "cycle_index",
+      "cycle_length_days",
+      "cycle_length_source",
+      "model_version",
+      "phase",
+      "phase_progress",
+      "phase_started_at"
+    ],
+    "sleep": [
+      "circadian_phase",
+      "interruption_count",
+      "last_transition_reason",
+      "last_wake_at",
+      "planned_wake_at",
+      "recovery_progress",
+      "sleep_debt",
+      "sleep_quality",
+      "sleep_started_at",
+      "sleepiness",
+      "state",
+      "state_since"
+    ],
+    "stress": [
+      "active_events",
+      "last_decay_at",
+      "last_event_at",
+      "level",
+      "model_version"
+    ],
+    "regulation": [
+      "arousal",
+      "calm_regulation",
+      "fatigue_load",
+      "model_version",
+      "reward_sensitivity",
+      "social_reassurance_drive",
+      "threat_sensitivity"
+    ],
+    "mood": [
+      "closeness_need",
+      "energy",
+      "model_version",
+      "physical_comfort",
+      "sensitivity",
+      "social_drive",
+      "stability",
+      "stress"
+    ],
+    "random": [
+      "algorithm",
+      "algorithm_version",
+      "master_seed_hex",
+      "streams"
+    ],
+    "cycle_keys": [
+      "anchor_at",
+      "confidence",
+      "cycle_day",
+      "cycle_index",
+      "cycle_length_days",
+      "cycle_length_source",
+      "model_version",
+      "phase",
+      "phase_progress",
+      "phase_started_at"
+    ]
+  },
+  "enums": {
+    "event_type": [
+      "group_message",
+      "mention",
+      "important_person_appear",
+      "comfort_received",
+      "conflict",
+      "long_silence",
+      "direct_question",
+      "admin_command",
+      "system_event"
+    ],
+    "relationship_tag": [
+      "ordinary",
+      "important",
+      "intimate",
+      "conflict",
+      "admin",
+      "unknown"
+    ],
+    "cycle_phase": [
+      "menstrual_like",
+      "follicular_like",
+      "ovulatory_like",
+      "luteal_like"
+    ],
+    "cycle_length_source": [
+      "sampled",
+      "manual",
+      "default"
+    ],
+    "sleep_state": [
+      "awake",
+      "sleepy",
+      "trying_to_sleep",
+      "sleeping",
+      "interrupted",
+      "waking_up"
+    ],
+    "delivery_policy": [
+      "deliver_now",
+      "queue_until_awake",
+      "silent_ignore",
+      "wake_candidate",
+      "urgent_interrupt"
+    ],
+    "verbosity_bias": [
+      "low",
+      "normal",
+      "high"
+    ],
+    "affection_expression": [
+      "reserved",
+      "normal",
+      "warm"
+    ]
+  },
+  "error_codes": [
+    {
+      "code": "INVALID_REQUEST",
+      "status": 400,
+      "retryable": false
+    },
+    {
+      "code": "INVALID_TIME",
+      "status": 400,
+      "retryable": false
+    },
+    {
+      "code": "UNAUTHORIZED",
+      "status": 401,
+      "retryable": false
+    },
+    {
+      "code": "FORBIDDEN_CHARACTER",
+      "status": 403,
+      "retryable": false
+    },
+    {
+      "code": "NOT_FOUND",
+      "status": 404,
+      "retryable": false
+    },
+    {
+      "code": "DUPLICATE_EVENT",
+      "status": 200,
+      "retryable": false
+    },
+    {
+      "code": "STATE_VERSION_CONFLICT",
+      "status": 409,
+      "retryable": true
+    },
+    {
+      "code": "RATE_LIMITED",
+      "status": 429,
+      "retryable": true
+    },
+    {
+      "code": "PAYLOAD_TOO_LARGE",
+      "status": 413,
+      "retryable": false
+    },
+    {
+      "code": "UNSUPPORTED_MEDIA_TYPE",
+      "status": 415,
+      "retryable": false
+    },
+    {
+      "code": "CLOCK_REGRESSION",
+      "status": 200,
+      "retryable": false
+    },
+    {
+      "code": "MODULE_FAILED",
+      "status": 500,
+      "retryable": false
+    },
+    {
+      "code": "STORAGE_FAILED",
+      "status": 503,
+      "retryable": true
+    },
+    {
+      "code": "DEGRADED",
+      "status": 200,
+      "retryable": true
+    },
+    {
+      "code": "INTERNAL",
+      "status": 500,
+      "retryable": false
+    }
+  ],
+  "warning_codes": [
+    "STORAGE_EVICTED",
+    "INVALID_TRANSITION_HINT",
+    "NON_PRIMARY_READONLY",
+    "PRIMARY_UNBOUND",
+    "CLOCK_REGRESSION",
+    "CLOCK_TOLERATED",
+    "FUTURE_OCCURRED_AT",
+    "EVENT_TOO_OLD",
+    "LONG_OFFLINE_COARSE",
+    "CLAMPED_DELTA",
+    "INPUT_CLAMPED",
+    "DUPLICATE_EVENT_ID",
+    "LOW_CONFIDENCE_CYCLE",
+    "MISSING_<MODULE>_DATA",
+    "UNKNOWN_CONFIG_KEY",
+    "UNKNOWN_DERIVED_KEY",
+    "MIGRATION_DEFERRED",
+    "STORAGE_OVER_BUDGET",
+    "RECOVERY_DEFERRED"
+  ],
+  "log_fields": [
+    "character_id",
+    "contributions",
+    "elapsed_seconds",
+    "error_code",
+    "event_id",
+    "level",
+    "module_ms",
+    "occurred_at",
+    "processed_at",
+    "reason_codes",
+    "state_version_after",
+    "state_version_before",
+    "ts"
+  ]
+}

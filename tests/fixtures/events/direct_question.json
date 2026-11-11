@@ -1,0 +1,24 @@
+{
+  "api_version": "v1",
+  "event_id": "evt_20261109_ev000007",
+  "idempotency_key": "evt_20261109_ev000007",
+  "character_id": "whale_character",
+  "event_type": "direct_question",
+  "occurred_at": "2026-11-09T04:36:00.000Z",
+  "received_at": "2026-11-09T04:36:01.000Z",
+  "source": {
+    "platform": "wechat",
+    "conversation_id": "group_123",
+    "conversation_kind": "group",
+    "sender_id": "sender_a1",
+    "is_mentioned": true,
+    "relationship_tag": "ordinary"
+  },
+  "payload": {
+    "message_type": "text",
+    "text_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "text_summary": "",
+    "is_direct_question": true
+  },
+  "tags": []
+}

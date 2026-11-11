@@ -1,0 +1,75 @@
+{
+  "contract": "00-统一契约 v1.7.13；字段表来源 05/06/07/08/09/10/11 §4.2",
+  "tables_unchanged_since": "v1.7.12",
+  "tables_unchanged_reason": "v1.7.13 只加 00 §7.2 的 P-08-01 注记与 12 的文档对齐（P-12-01/02/04/07），不改任何模块 §4.2 inputs（W3-3 不触发）；v1.7.12 的 C-06-01/C-06-02 改过 06 §4.2（删 inputs.event，加 event_intensity / urgent_interrupt），本 fixture 的 sleep.keys 已同步；v1.7.11 只加 00 §11 的 adminReset 与 transaction(signal) 签名（仓库接口，不是模块 inputs）、§2.1 幂等键优先级、12 的 admin payload 与 dry_run 标注；v1.7.10 只改 13/12/14/16 的预算、信封与统计口径；v1.7.9 只调 10 §5.4 的 high 阈值与 11 §5.3 规则 0；v1.7.8 只在输出侧给 delivery 增加可选 coalesced_into；v1.7.7 只加 00 §7.3 的 0.12 可达性注记与 applyLimits 参数名 editorial；v1.7.6 为 08/09 的 inputs 增加 dt，故 modules.regulation / modules.mood 的键集同步变更；v1.7.5 只新增 ModuleResult.derived 白名单键 derived.event_intensity（不是 inputs 字段表）",
+  "note": "keys 必须与实测 inputs 的键集完全相等；optional 为允许缺省的键（缺省时不得出现在键集中）；nested.path 用点号寻址。",
+  "modules": {
+    "cycle": {
+      "keys": []
+    },
+    "sleep": {
+      "keys": ["urgent", "urgent_interrupt", "event_intensity", "planned_wake_at"]
+    },
+    "stress": {
+      "keys": ["event", "activity"],
+      "nested": [
+        { "path": "activity", "keys": ["last_event_at", "recent_event_ids"] }
+      ]
+    },
+    "event": {
+      "keys": ["event", "activity"],
+      "nested": [
+        { "path": "activity", "keys": ["last_event_at", "recent_event_ids"] }
+      ]
+    },
+    "regulation": {
+      "keys": ["cycle", "sleep", "stress", "mood", "dt"],
+      "nested": [
+        { "path": "cycle", "keys": ["phase"] },
+        { "path": "sleep", "keys": ["sleep_debt", "sleep_quality", "sleepiness"] },
+        { "path": "stress", "keys": ["level", "active_events"] },
+        { "path": "mood", "keys": ["energy", "stability", "closeness_need"] }
+      ]
+    },
+    "mood": {
+      "keys": ["cycle", "sleep", "stress", "regulation", "event", "dt"],
+      "nested": [
+        { "path": "cycle", "keys": ["phase", "scalars"], "optional": ["phase_vector"] },
+        { "path": "cycle.scalars", "keys": ["cycle_sensitivity"] },
+        { "path": "sleep", "keys": ["sleep_debt", "sleep_quality", "sleepiness"] },
+        { "path": "stress", "keys": ["level"] },
+        {
+          "path": "regulation",
+          "keys": [
+            "reward_sensitivity",
+            "arousal",
+            "threat_sensitivity",
+            "calm_regulation",
+            "social_reassurance_drive",
+            "fatigue_load"
+          ]
+        },
+        { "path": "event", "keys": ["intensity"] }
+      ]
+    },
+    "behavior": {
+      "keys": ["mood", "sleep", "stress", "now"],
+      "nested": [
+        {
+          "path": "mood",
+          "keys": ["energy", "stability", "sensitivity", "social_drive", "closeness_need"]
+        },
+        { "path": "sleep", "keys": ["state", "sleepiness", "sleep_debt"] },
+        { "path": "stress", "keys": ["level"] }
+      ]
+    },
+    "delivery": {
+      "keys": ["event", "sleep", "queue"],
+      "nested": [
+        { "path": "event", "keys": ["event_type", "is_mentioned", "event_id", "conversation_id"] },
+        { "path": "sleep", "keys": ["state", "sleepiness", "sleep_debt", "planned_wake_at"] },
+        { "path": "queue", "keys": ["pending"] }
+      ]
+    }
+  }
+}

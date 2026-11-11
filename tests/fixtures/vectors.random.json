@@ -1,0 +1,25 @@
+{
+  "source": "docs/03 §6.1–§6.3",
+  "master_seed_hex": "000102030405060708090a0b0c0d0e0f",
+  "character_id": "whale_character",
+  "algorithm": "pcg32",
+  "algorithm_version": 1,
+  "reference": {
+    "initstate": 42,
+    "initseq": 54,
+    "u32": [2707161783, 2068313097, 3122475824, 2211639955, 3215226955, 3421331566]
+  },
+  "streams": {
+    "cycle": {
+      "seed_hex": "764d289e285a86b68df58ef666b4c9ab",
+      "initstate": "0x764d289e285a86b6",
+      "initseq": "0x8df58ef666b4c9ab",
+      "u32": [1046525588, 1529956639, 687281651, 364402564, 939780660],
+      "floats": [0.243663226, 0.356220789, 0.160020229, 0.084844084, 0.218809736]
+    },
+    "sleep": { "seed_hex": "2a335db9e807acd15ced81dd3d031dd0" },
+    "mood": { "seed_hex": "ecf6bd05e6e6f015b0a1d365b8c07051" },
+    "event": { "seed_hex": "9398027bcf759ae763ab788570dbeb47" },
+    "delivery": { "seed_hex": "09a2ee87bac47513794a69b42e3b6e80" }
+  }
+}

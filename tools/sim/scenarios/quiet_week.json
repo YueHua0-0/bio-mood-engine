@@ -1,0 +1,2131 @@
+{
+  "character_id": "sim_character",
+  "timezone": "Asia/Shanghai",
+  "master_seed_hex": "000102030405060708090a0b0c0d0e0f",
+  "step_seconds": 3600,
+  "config_overrides": {},
+  "assertions": {
+    "max_abs_delta_per_step": 0.15,
+    "mean_ranges": {
+      "mood.energy": [
+        0,
+        0.85
+      ],
+      "mood.stability": [
+        0.25,
+        0.9
+      ],
+      "stress.level": [
+        0.02,
+        0.65
+      ]
+    },
+    "no_edge_run_hours": 72
+  },
+  "scenario_id": "quiet_week",
+  "description": "7 天低强度群聊：验证基线漂移、单步阈值与 72 小时贴边。",
+  "start_at": "2026-11-01T00:00:00.000Z",
+  "end_at": "2026-11-08T00:00:00.000Z",
+  "events": [
+    {
+      "at": "2026-11-01T01:00:00.000Z",
+      "event_id": "quiet-0-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-01T01:26:00.000Z",
+      "event_id": "quiet-0-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T01:52:00.000Z",
+      "event_id": "quiet-0-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T02:18:00.000Z",
+      "event_id": "quiet-0-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T02:44:00.000Z",
+      "event_id": "quiet-0-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T03:10:00.000Z",
+      "event_id": "quiet-0-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T03:36:00.000Z",
+      "event_id": "quiet-0-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T04:02:00.000Z",
+      "event_id": "quiet-0-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T04:28:00.000Z",
+      "event_id": "quiet-0-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T04:54:00.000Z",
+      "event_id": "quiet-0-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T05:20:00.000Z",
+      "event_id": "quiet-0-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T05:46:00.000Z",
+      "event_id": "quiet-0-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-01T06:12:00.000Z",
+      "event_id": "quiet-0-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T06:38:00.000Z",
+      "event_id": "quiet-0-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T07:04:00.000Z",
+      "event_id": "quiet-0-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T07:30:00.000Z",
+      "event_id": "quiet-0-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T07:56:00.000Z",
+      "event_id": "quiet-0-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T08:22:00.000Z",
+      "event_id": "quiet-0-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T08:48:00.000Z",
+      "event_id": "quiet-0-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T09:14:00.000Z",
+      "event_id": "quiet-0-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T09:40:00.000Z",
+      "event_id": "quiet-0-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T10:06:00.000Z",
+      "event_id": "quiet-0-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T10:32:00.000Z",
+      "event_id": "quiet-0-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-01T10:58:00.000Z",
+      "event_id": "quiet-0-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T11:24:00.000Z",
+      "event_id": "quiet-0-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T11:50:00.000Z",
+      "event_id": "quiet-0-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T12:16:00.000Z",
+      "event_id": "quiet-0-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T12:42:00.000Z",
+      "event_id": "quiet-0-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T13:08:00.000Z",
+      "event_id": "quiet-0-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-01T13:34:00.000Z",
+      "event_id": "quiet-0-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T01:00:00.000Z",
+      "event_id": "quiet-1-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-02T01:26:00.000Z",
+      "event_id": "quiet-1-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T01:52:00.000Z",
+      "event_id": "quiet-1-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T02:18:00.000Z",
+      "event_id": "quiet-1-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T02:44:00.000Z",
+      "event_id": "quiet-1-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T03:10:00.000Z",
+      "event_id": "quiet-1-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T03:36:00.000Z",
+      "event_id": "quiet-1-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T04:02:00.000Z",
+      "event_id": "quiet-1-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T04:28:00.000Z",
+      "event_id": "quiet-1-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T04:54:00.000Z",
+      "event_id": "quiet-1-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T05:20:00.000Z",
+      "event_id": "quiet-1-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T05:46:00.000Z",
+      "event_id": "quiet-1-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-02T06:12:00.000Z",
+      "event_id": "quiet-1-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T06:38:00.000Z",
+      "event_id": "quiet-1-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T07:04:00.000Z",
+      "event_id": "quiet-1-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T07:30:00.000Z",
+      "event_id": "quiet-1-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T07:56:00.000Z",
+      "event_id": "quiet-1-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T08:22:00.000Z",
+      "event_id": "quiet-1-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T08:48:00.000Z",
+      "event_id": "quiet-1-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T09:14:00.000Z",
+      "event_id": "quiet-1-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T09:40:00.000Z",
+      "event_id": "quiet-1-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T10:06:00.000Z",
+      "event_id": "quiet-1-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T10:32:00.000Z",
+      "event_id": "quiet-1-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-02T10:58:00.000Z",
+      "event_id": "quiet-1-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T11:24:00.000Z",
+      "event_id": "quiet-1-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T11:50:00.000Z",
+      "event_id": "quiet-1-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T12:16:00.000Z",
+      "event_id": "quiet-1-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T12:42:00.000Z",
+      "event_id": "quiet-1-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T13:08:00.000Z",
+      "event_id": "quiet-1-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-02T13:34:00.000Z",
+      "event_id": "quiet-1-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T01:00:00.000Z",
+      "event_id": "quiet-2-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-03T01:26:00.000Z",
+      "event_id": "quiet-2-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T01:52:00.000Z",
+      "event_id": "quiet-2-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T02:18:00.000Z",
+      "event_id": "quiet-2-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T02:44:00.000Z",
+      "event_id": "quiet-2-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T03:10:00.000Z",
+      "event_id": "quiet-2-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T03:36:00.000Z",
+      "event_id": "quiet-2-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T04:02:00.000Z",
+      "event_id": "quiet-2-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T04:28:00.000Z",
+      "event_id": "quiet-2-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T04:54:00.000Z",
+      "event_id": "quiet-2-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:20:00.000Z",
+      "event_id": "quiet-2-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T05:46:00.000Z",
+      "event_id": "quiet-2-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-03T06:12:00.000Z",
+      "event_id": "quiet-2-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T06:38:00.000Z",
+      "event_id": "quiet-2-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T07:04:00.000Z",
+      "event_id": "quiet-2-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T07:30:00.000Z",
+      "event_id": "quiet-2-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T07:56:00.000Z",
+      "event_id": "quiet-2-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T08:22:00.000Z",
+      "event_id": "quiet-2-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T08:48:00.000Z",
+      "event_id": "quiet-2-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T09:14:00.000Z",
+      "event_id": "quiet-2-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T09:40:00.000Z",
+      "event_id": "quiet-2-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T10:06:00.000Z",
+      "event_id": "quiet-2-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T10:32:00.000Z",
+      "event_id": "quiet-2-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-03T10:58:00.000Z",
+      "event_id": "quiet-2-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T11:24:00.000Z",
+      "event_id": "quiet-2-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T11:50:00.000Z",
+      "event_id": "quiet-2-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T12:16:00.000Z",
+      "event_id": "quiet-2-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T12:42:00.000Z",
+      "event_id": "quiet-2-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T13:08:00.000Z",
+      "event_id": "quiet-2-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-03T13:34:00.000Z",
+      "event_id": "quiet-2-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T01:00:00.000Z",
+      "event_id": "quiet-3-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-04T01:26:00.000Z",
+      "event_id": "quiet-3-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T01:52:00.000Z",
+      "event_id": "quiet-3-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T02:18:00.000Z",
+      "event_id": "quiet-3-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T02:44:00.000Z",
+      "event_id": "quiet-3-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T03:10:00.000Z",
+      "event_id": "quiet-3-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T03:36:00.000Z",
+      "event_id": "quiet-3-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T04:02:00.000Z",
+      "event_id": "quiet-3-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T04:28:00.000Z",
+      "event_id": "quiet-3-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T04:54:00.000Z",
+      "event_id": "quiet-3-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T05:20:00.000Z",
+      "event_id": "quiet-3-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T05:46:00.000Z",
+      "event_id": "quiet-3-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-04T06:12:00.000Z",
+      "event_id": "quiet-3-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T06:38:00.000Z",
+      "event_id": "quiet-3-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T07:04:00.000Z",
+      "event_id": "quiet-3-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T07:30:00.000Z",
+      "event_id": "quiet-3-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T07:56:00.000Z",
+      "event_id": "quiet-3-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T08:22:00.000Z",
+      "event_id": "quiet-3-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T08:48:00.000Z",
+      "event_id": "quiet-3-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T09:14:00.000Z",
+      "event_id": "quiet-3-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T09:40:00.000Z",
+      "event_id": "quiet-3-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T10:06:00.000Z",
+      "event_id": "quiet-3-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T10:32:00.000Z",
+      "event_id": "quiet-3-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-04T10:58:00.000Z",
+      "event_id": "quiet-3-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T11:24:00.000Z",
+      "event_id": "quiet-3-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T11:50:00.000Z",
+      "event_id": "quiet-3-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T12:16:00.000Z",
+      "event_id": "quiet-3-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T12:42:00.000Z",
+      "event_id": "quiet-3-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T13:08:00.000Z",
+      "event_id": "quiet-3-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-04T13:34:00.000Z",
+      "event_id": "quiet-3-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T01:00:00.000Z",
+      "event_id": "quiet-4-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-05T01:26:00.000Z",
+      "event_id": "quiet-4-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T01:52:00.000Z",
+      "event_id": "quiet-4-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T02:18:00.000Z",
+      "event_id": "quiet-4-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T02:44:00.000Z",
+      "event_id": "quiet-4-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T03:10:00.000Z",
+      "event_id": "quiet-4-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T03:36:00.000Z",
+      "event_id": "quiet-4-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T04:02:00.000Z",
+      "event_id": "quiet-4-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T04:28:00.000Z",
+      "event_id": "quiet-4-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T04:54:00.000Z",
+      "event_id": "quiet-4-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T05:20:00.000Z",
+      "event_id": "quiet-4-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T05:46:00.000Z",
+      "event_id": "quiet-4-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-05T06:12:00.000Z",
+      "event_id": "quiet-4-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T06:38:00.000Z",
+      "event_id": "quiet-4-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T07:04:00.000Z",
+      "event_id": "quiet-4-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T07:30:00.000Z",
+      "event_id": "quiet-4-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T07:56:00.000Z",
+      "event_id": "quiet-4-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T08:22:00.000Z",
+      "event_id": "quiet-4-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T08:48:00.000Z",
+      "event_id": "quiet-4-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T09:14:00.000Z",
+      "event_id": "quiet-4-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T09:40:00.000Z",
+      "event_id": "quiet-4-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T10:06:00.000Z",
+      "event_id": "quiet-4-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T10:32:00.000Z",
+      "event_id": "quiet-4-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-05T10:58:00.000Z",
+      "event_id": "quiet-4-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T11:24:00.000Z",
+      "event_id": "quiet-4-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T11:50:00.000Z",
+      "event_id": "quiet-4-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T12:16:00.000Z",
+      "event_id": "quiet-4-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T12:42:00.000Z",
+      "event_id": "quiet-4-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T13:08:00.000Z",
+      "event_id": "quiet-4-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-05T13:34:00.000Z",
+      "event_id": "quiet-4-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T01:00:00.000Z",
+      "event_id": "quiet-5-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-06T01:26:00.000Z",
+      "event_id": "quiet-5-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T01:52:00.000Z",
+      "event_id": "quiet-5-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T02:18:00.000Z",
+      "event_id": "quiet-5-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T02:44:00.000Z",
+      "event_id": "quiet-5-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T03:10:00.000Z",
+      "event_id": "quiet-5-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T03:36:00.000Z",
+      "event_id": "quiet-5-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T04:02:00.000Z",
+      "event_id": "quiet-5-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T04:28:00.000Z",
+      "event_id": "quiet-5-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T04:54:00.000Z",
+      "event_id": "quiet-5-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T05:20:00.000Z",
+      "event_id": "quiet-5-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T05:46:00.000Z",
+      "event_id": "quiet-5-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-06T06:12:00.000Z",
+      "event_id": "quiet-5-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T06:38:00.000Z",
+      "event_id": "quiet-5-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T07:04:00.000Z",
+      "event_id": "quiet-5-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T07:30:00.000Z",
+      "event_id": "quiet-5-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T07:56:00.000Z",
+      "event_id": "quiet-5-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T08:22:00.000Z",
+      "event_id": "quiet-5-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T08:48:00.000Z",
+      "event_id": "quiet-5-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T09:14:00.000Z",
+      "event_id": "quiet-5-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T09:40:00.000Z",
+      "event_id": "quiet-5-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T10:06:00.000Z",
+      "event_id": "quiet-5-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T10:32:00.000Z",
+      "event_id": "quiet-5-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-06T10:58:00.000Z",
+      "event_id": "quiet-5-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T11:24:00.000Z",
+      "event_id": "quiet-5-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T11:50:00.000Z",
+      "event_id": "quiet-5-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T12:16:00.000Z",
+      "event_id": "quiet-5-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T12:42:00.000Z",
+      "event_id": "quiet-5-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T13:08:00.000Z",
+      "event_id": "quiet-5-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-06T13:34:00.000Z",
+      "event_id": "quiet-5-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T01:00:00.000Z",
+      "event_id": "quiet-6-0",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-07T01:26:00.000Z",
+      "event_id": "quiet-6-1",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T01:52:00.000Z",
+      "event_id": "quiet-6-2",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T02:18:00.000Z",
+      "event_id": "quiet-6-3",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T02:44:00.000Z",
+      "event_id": "quiet-6-4",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T03:10:00.000Z",
+      "event_id": "quiet-6-5",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T03:36:00.000Z",
+      "event_id": "quiet-6-6",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T04:02:00.000Z",
+      "event_id": "quiet-6-7",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T04:28:00.000Z",
+      "event_id": "quiet-6-8",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T04:54:00.000Z",
+      "event_id": "quiet-6-9",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T05:20:00.000Z",
+      "event_id": "quiet-6-10",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T05:46:00.000Z",
+      "event_id": "quiet-6-11",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-07T06:12:00.000Z",
+      "event_id": "quiet-6-12",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T06:38:00.000Z",
+      "event_id": "quiet-6-13",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T07:04:00.000Z",
+      "event_id": "quiet-6-14",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T07:30:00.000Z",
+      "event_id": "quiet-6-15",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T07:56:00.000Z",
+      "event_id": "quiet-6-16",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T08:22:00.000Z",
+      "event_id": "quiet-6-17",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T08:48:00.000Z",
+      "event_id": "quiet-6-18",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T09:14:00.000Z",
+      "event_id": "quiet-6-19",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T09:40:00.000Z",
+      "event_id": "quiet-6-20",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": true,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T10:06:00.000Z",
+      "event_id": "quiet-6-21",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T10:32:00.000Z",
+      "event_id": "quiet-6-22",
+      "event_type": "direct_question",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": true
+    },
+    {
+      "at": "2026-11-07T10:58:00.000Z",
+      "event_id": "quiet-6-23",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T11:24:00.000Z",
+      "event_id": "quiet-6-24",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T11:50:00.000Z",
+      "event_id": "quiet-6-25",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T12:16:00.000Z",
+      "event_id": "quiet-6-26",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T12:42:00.000Z",
+      "event_id": "quiet-6-27",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_1",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T13:08:00.000Z",
+      "event_id": "quiet-6-28",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_2",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    },
+    {
+      "at": "2026-11-07T13:34:00.000Z",
+      "event_id": "quiet-6-29",
+      "event_type": "group_message",
+      "conversation_id": "sim_group",
+      "sender_id": "sim_sender_3",
+      "relationship_tag": "ordinary",
+      "is_mentioned": false,
+      "is_direct_question": false
+    }
+  ]
+}

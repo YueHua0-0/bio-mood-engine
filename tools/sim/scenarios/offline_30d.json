@@ -1,0 +1,30 @@
+{
+  "character_id": "sim_character",
+  "timezone": "Asia/Shanghai",
+  "master_seed_hex": "000102030405060708090a0b0c0d0e0f",
+  "step_seconds": 3600,
+  "config_overrides": {},
+  "assertions": {
+    "max_abs_delta_per_step": 0.15,
+    "mean_ranges": {
+      "mood.energy": [
+        0,
+        0.85
+      ],
+      "mood.stability": [
+        0.25,
+        0.9
+      ],
+      "stress.level": [
+        0.02,
+        0.65
+      ]
+    },
+    "no_edge_run_hours": 72
+  },
+  "scenario_id": "offline_30d",
+  "description": "30 天离线零事件：验证长期漂移、睡眠节律与无事件压力衰减。",
+  "start_at": "2026-11-01T00:00:00.000Z",
+  "end_at": "2026-12-01T00:00:00.000Z",
+  "events": []
+}

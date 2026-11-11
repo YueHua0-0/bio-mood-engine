@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" data-ark="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>角色状态 · Bio-Mood Engine</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="page.js"></script>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-code">RHODES ISLAND // INTERNAL SYSTEM</span>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-tag" id="link-state"><span class="dot" aria-hidden="true"></span><span id="link-text">连接中</span></span>
+      <label class="chat-picker" id="chat-picker" hidden>
+        <span>会话</span>
+        <select id="chat" aria-label="选择已授权聊天"></select>
+      </label>
+      <button type="button" class="btn" id="refresh">刷新</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">PRTS-13 / BIO-MOOD ENGINE / STATUS MONITOR</p>
+        <h1>角色状态</h1>
+        <p class="sub" id="identity">虚构角色 — · 状态版本 — · 更新于 —</p>
+      </div>
+      <div class="page-tags" id="page-tags"></div>
+    </div>
+
+    <p class="notice" id="notice" hidden></p>
+
+    <section class="metrics" aria-label="关键指标">
+      <article class="metric">
+        <span class="metric-label"><b>01</b>周期日</span>
+        <span class="metric-value"><b id="m-cycle-day">—</b><em>天</em></span>
+        <span class="metric-note" id="m-cycle-note">阶段 —</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label"><b>02</b>睡眠负债</span>
+        <span class="metric-value"><b id="m-sleep-debt">—</b><em>指数</em></span>
+        <span class="metric-note" id="m-sleep-note">睡眠状态 —</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label"><b>03</b>压力水平</span>
+        <span class="metric-value"><b id="m-stress">—</b><em>指数</em></span>
+        <span class="metric-note" id="m-stress-note">活跃事件 —</span>
+      </article>
+      <article class="metric">
+        <span class="metric-label"><b>04</b>精力</span>
+        <span class="metric-value"><b id="m-energy">—</b><em>指数</em></span>
+        <span class="metric-note" id="m-energy-note">情绪七维之一</span>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <header class="card-head">
+          <div><span class="card-code">MODULE 01</span><h2>周期</h2></div>
+          <span class="status-tag" id="cycle-tag">—</span>
+        </header>
+        <dl class="facts">
+          <div><dt>当前阶段</dt><dd id="cycle-phase">—</dd></div>
+          <div><dt>周期日</dt><dd id="cycle-day">—</dd></div>
+          <div><dt>阶段进度</dt><dd id="cycle-progress-text">—</dd></div>
+          <div><dt>置信度</dt><dd id="cycle-confidence">—</dd></div>
+        </dl>
+        <div class="bar" role="img" aria-label="阶段进度"><i id="cycle-progress"></i></div>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <div><span class="card-code">MODULE 02</span><h2>睡眠</h2></div>
+          <span class="status-tag" id="sleep-tag">—</span>
+        </header>
+        <dl class="facts">
+          <div><dt>睡眠状态</dt><dd id="sleep-state">—</dd></div>
+          <div><dt>计划醒来</dt><dd id="sleep-wake">—</dd></div>
+        </dl>
+        <div class="bar-rows">
+          <div class="bar-row"><span>睡眠负债</span><div class="bar"><i id="sleep-debt-bar"></i></div><b id="sleep-debt-text">—</b></div>
+          <div class="bar-row"><span>困倦度</span><div class="bar"><i id="sleepiness-bar"></i></div><b id="sleepiness-text">—</b></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <div><span class="card-code">MODULE 03</span><h2>压力</h2></div>
+          <span class="status-tag" id="stress-tag">—</span>
+        </header>
+        <dl class="facts">
+          <div><dt>压力水平</dt><dd id="stress-level">—</dd></div>
+          <div><dt>活跃事件</dt><dd id="stress-events">—</dd></div>
+        </dl>
+        <div class="bar" role="img" aria-label="压力水平"><i id="stress-bar"></i></div>
+        <p class="card-note" id="stress-note">—</p>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <div><span class="card-code">MODULE 04</span><h2>情绪</h2></div>
+          <span class="status-tag" id="mood-tag">—</span>
+        </header>
+        <div class="rows" id="mood-rows"></div>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <div><span class="card-code">MODULE 05</span><h2>行为倾向</h2></div>
+          <span class="card-code">OUTPUT</span>
+        </header>
+        <div class="rows" id="behavior-rows"></div>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <div><span class="card-code">MODULE 06</span><h2>调节参数</h2></div>
+          <span class="card-code">INTERNAL</span>
+        </header>
+        <div class="rows" id="regulation-rows"></div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <p>本页数据为虚构角色状态模拟，不是人体医学模型，不用于诊断、治疗或现实健康预测。</p>
+      <p class="footer-meta">数据源 read-state · 30 秒自动刷新 · 页面内不写盘</p>
+    </footer>
+  </main>
+</div>
+</body>
+</html>
