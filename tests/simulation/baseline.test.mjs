@@ -138,9 +138,22 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
   if (instrumented) {
     t.diagnostic('检测到 V8 覆盖率插桩（NODE_V8_COVERAGE），本次只记录耗时，不判定性能阈值。');
   }
-  // 1) 纯 chunk 计算（8 模块，内存 repo，不含 I/O）：≤0.4 ms
-  // P-15-09：单次采样把 JIT 预热与瞬时负载都算进去，改为固定 5 轮、丢弃一轮预热、取中位数。
-  // 阈值不变；每轮独立重置状态，避免轮间状态漂移影响计时。
+  // 0) 同进程基准：PCG32 nextU32 每次耗时（P-15-09 归一化分母）。
+  // 与 chunk 在同一进程、同一负载下测量，机器主频与瞬时负载在比值中抵消。
+  const nextU32PerOp = (() => {
+    const stream = providerOf(loadValidState()).stream('mood');
+    let sink = 0;
+    const start = performance.now();
+    for (let i = 0; i < 1_000_000; i += 1) sink ^= stream.nextU32();
+    measured.nextU32Ms = performance.now() - start;
+    assert.equal(typeof sink, 'number');
+    return measured.nextU32Ms / 1_000_000;
+  })();
+
+  // 1) 纯 chunk 计算（8 模块，内存 repo，不含 I/O）：归一化比值门禁
+  // P-15-09（裁决 A）：原 0.4 ms 绝对值门禁标定于单机，CI 共享 runner 实测 0.5517 ms/次不可比。
+  // 改为「每步耗时 / nextU32 每次耗时」：5 轮、丢弃一轮预热，取**最小**比值（干扰最小的下界），
+  // 中位数与绝对值仍输出用于诊断。3400 ≈ 本机最小比值（0.3638 / 1.334e-4 ≈ 2727）的 1.25 倍。
   {
     const samples = 2000;
     const rounds = 5;
@@ -156,12 +169,21 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
       }
       if (round > 0) perRound.push((performance.now() - start) / samples);
     }
-    const perOp = percentile(perRound, 0.5);
-    measured.chunkMs = perOp;
+    const medMs = percentile(perRound, 0.5);
+    const minMs = Math.min(...perRound);
+    const ratios = perRound.map((ms) => ms / nextU32PerOp);
+    const minRatio = Math.min(...ratios);
+    const medRatio = percentile(ratios, 0.5);
+    measured.chunkMs = medMs;
+    measured.chunkRatio = minRatio;
     t.diagnostic(
-      `纯 chunk 5 轮（预热已丢弃）：min ${Math.min(...perRound).toFixed(4)} / 中位 ${perOp.toFixed(4)} / max ${Math.max(...perRound).toFixed(4)} ms/次`
+      `纯 chunk 5 轮：min ${minMs.toFixed(4)} / 中位 ${medMs.toFixed(4)} / max ${Math.max(...perRound).toFixed(4)} ms/次；` +
+        `比值 min ${minRatio.toFixed(0)} / 中位 ${medRatio.toFixed(0)}（门禁 ≤3400）`
     );
-    checkPerf(perOp <= 0.4, `纯 chunk 计算中位数 ${perOp.toFixed(4)} ms/次 > 0.4 ms`);
+    checkPerf(
+      minRatio <= 3400,
+      `纯 chunk 归一化比值 ${minRatio.toFixed(0)} > 3400（中位 ${medRatio.toFixed(0)}；原始 min ${minMs.toFixed(4)} / 中位 ${medMs.toFixed(4)} ms/次，基准 ${measured.nextU32Ms.toFixed(1)} ms/百万次）`
+    );
   }
 
   // 2) 端到端 advance（含事务与存储，1 小时步）：P95 ≤15 ms
@@ -190,15 +212,25 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
     checkPerf(p95 <= 15, `端到端 P95 ${p95.toFixed(3)} ms > 15 ms`);
   }
 
-  // 3) 4320 步离线推进（含 10 年粗推进）：≤2 s
+  // 3) 4320 步离线推进（含 10 年粗推进）：3 轮取最小值 ≤2 s
+  // P-15-09：单次测量同样受负载干扰（本机单次 2440 ms、最小 1431 ms 量级），
+  // 取 3 轮最小值作为干扰下界；粗推进告警与 last_tick_at 断言仍对每轮结果校验。
   {
     const state = loadValidState();
     const now = isoAfter(state.last_tick_at, 3600 * 24 * 365 * 10);
-    const start = performance.now();
-    const out = advance({ state, event: null, now, rngProvider: providerOf(state), modules: MODULES });
-    const elapsed = performance.now() - start;
+    const elapsedRounds = [];
+    let out = null;
+    for (let round = 0; round < 3; round += 1) {
+      const start = performance.now();
+      out = advance({ state, event: null, now, rngProvider: providerOf(state), modules: MODULES });
+      elapsedRounds.push(performance.now() - start);
+    }
+    const elapsed = Math.min(...elapsedRounds);
     measured.offlineMs = elapsed;
-    checkPerf(elapsed <= 2000, `4320 步离线推进 ${elapsed.toFixed(1)} ms > 2000 ms`);
+    t.diagnostic(
+      `4320 步 3 轮：min ${elapsed.toFixed(1)} / max ${Math.max(...elapsedRounds).toFixed(1)} ms（门禁 ≤2000）`
+    );
+    checkPerf(elapsed <= 2000, `4320 步离线推进最小值 ${elapsed.toFixed(1)} ms > 2000 ms`);
     assert.ok(
       out.diagnostics.warnings.some((code) => code.startsWith('LONG_OFFLINE_COARSE')),
       '超过 4320 步必须走粗推进并给出 LONG_OFFLINE_COARSE'
@@ -206,17 +238,9 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
     assert.equal(out.state.last_tick_at, now);
   }
 
-  // 4) nextU32 100 万次：≤2 s
+  // 4) nextU32 100 万次：≤2 s（复用第 0 步的基准测量，避免重复计时）
   {
-    const provider = providerOf(loadValidState());
-    const stream = provider.stream('mood');
-    const start = performance.now();
-    let sink = 0;
-    for (let i = 0; i < 1_000_000; i += 1) sink ^= stream.nextU32();
-    const elapsed = performance.now() - start;
-    measured.nextU32Ms = elapsed;
-    assert.equal(typeof sink, 'number');
-    checkPerf(elapsed <= 2000, `nextU32 100 万次 ${elapsed.toFixed(1)} ms > 2000 ms`);
+    checkPerf(measured.nextU32Ms <= 2000, `nextU32 100 万次 ${measured.nextU32Ms.toFixed(1)} ms > 2000 ms`);
   }
 
   // 5) 插件包构建：13 W5 已落地；以"模块加载 + setup"实测 ≤30 s。
@@ -236,7 +260,7 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
     checkPerf(elapsed <= 30_000, `插件构建 ${elapsed.toFixed(1)} ms > 30 s`);
   }
   t.diagnostic(
-    `T12 实测：纯 chunk ${measured.chunkMs.toFixed(4)} ms/次；端到端 P95 ${measured.e2eP95Ms.toFixed(3)} ms；` +
+    `T12 实测：纯 chunk ${measured.chunkMs.toFixed(4)} ms/次（比值 ${measured.chunkRatio.toFixed(0)}）；端到端 P95 ${measured.e2eP95Ms.toFixed(3)} ms；` +
       `4320 步 ${measured.offlineMs.toFixed(1)} ms；nextU32 100 万 ${measured.nextU32Ms.toFixed(1)} ms；` +
       `插件加载+setup ${measured.pluginMs.toFixed(1)} ms`
   );
