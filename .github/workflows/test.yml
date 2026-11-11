@@ -21,6 +21,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Record runner environment
+        shell: bash
+        run: |
+          echo "=== cpu ==="
+          (lscpu || true) | head -20
+          echo "=== nproc ==="
+          nproc || true
+          echo "=== load ==="
+          uptime || true
       - name: Full test suite
         run: node --test --test-concurrency=1
 
@@ -32,6 +41,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Record runner environment
+        shell: bash
+        run: |
+          echo "=== cpu ==="
+          (lscpu || true) | head -20
+          echo "=== nproc ==="
+          nproc || true
+          echo "=== load ==="
+          uptime || true
       - name: Run full suite 10 times
         id: stability
         shell: bash

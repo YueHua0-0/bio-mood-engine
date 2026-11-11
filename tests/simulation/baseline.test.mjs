@@ -139,20 +139,29 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
     t.diagnostic('检测到 V8 覆盖率插桩（NODE_V8_COVERAGE），本次只记录耗时，不判定性能阈值。');
   }
   // 1) 纯 chunk 计算（8 模块，内存 repo，不含 I/O）：≤0.4 ms
-
+  // P-15-09：单次采样把 JIT 预热与瞬时负载都算进去，改为固定 5 轮、丢弃一轮预热、取中位数。
+  // 阈值不变；每轮独立重置状态，避免轮间状态漂移影响计时。
   {
-    let state = loadValidState();
-    let now = state.last_tick_at;
-    const provider = providerOf(state);
     const samples = 2000;
-    const start = performance.now();
-    for (let i = 0; i < samples; i += 1) {
-      now = isoAfter(now, 3600);
-      state = advance({ state, event: null, now, rngProvider: provider, modules: MODULES }).state;
+    const rounds = 5;
+    const perRound = [];
+    for (let round = 0; round <= rounds; round += 1) {
+      let state = loadValidState();
+      let now = state.last_tick_at;
+      const provider = providerOf(state);
+      const start = performance.now();
+      for (let i = 0; i < samples; i += 1) {
+        now = isoAfter(now, 3600);
+        state = advance({ state, event: null, now, rngProvider: provider, modules: MODULES }).state;
+      }
+      if (round > 0) perRound.push((performance.now() - start) / samples);
     }
-    const perOp = (performance.now() - start) / samples;
+    const perOp = percentile(perRound, 0.5);
     measured.chunkMs = perOp;
-    checkPerf(perOp <= 0.4, `纯 chunk 计算 ${perOp.toFixed(4)} ms/次 > 0.4 ms`);
+    t.diagnostic(
+      `纯 chunk 5 轮（预热已丢弃）：min ${Math.min(...perRound).toFixed(4)} / 中位 ${perOp.toFixed(4)} / max ${Math.max(...perRound).toFixed(4)} ms/次`
+    );
+    checkPerf(perOp <= 0.4, `纯 chunk 计算中位数 ${perOp.toFixed(4)} ms/次 > 0.4 ms`);
   }
 
   // 2) 端到端 advance（含事务与存储，1 小时步）：P95 ≤15 ms
