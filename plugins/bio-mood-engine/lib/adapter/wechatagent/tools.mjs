@@ -310,9 +310,9 @@ function configDebugOf(settings) {
   const ids = Array.isArray(settings.primaryChatIds) ? settings.primaryChatIds : [];
   return {
     enabled: settings.enabled,
-    // P-13-19：多主会话，回显逗号拼接的完整列表；空字符串保留给 PRIMARY_UNBOUND 场景。
-    primary_chat_id: ids.length > 0 ? ids.join(',') : (settings.primaryChatId || ''),
-    primary_chat_count: ids.length,
+    // P-13-20：v1 只回显唯一主会话；空字符串保留给 PRIMARY_UNBOUND 场景。
+    primary_chat_id: ids[0] ?? (settings.primaryChatId || ''),
+    primary_chat_count: ids.length > 0 ? 1 : 0,
     admin_ids: Array.isArray(settings.adminActorIds) ? settings.adminActorIds.length : 0,
     engine_mode: settings.engineMode,
     shadow_mode: settings.shadowMode

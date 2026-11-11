@@ -55,11 +55,11 @@ export function setup(api = {}) {
 
   const ctx = resolveCtx(api);
   activeCtx = ctx;
-  const { settings, warnings } = normalizeConfig(ctx.config());
+  const { settings, warnings, errors } = normalizeConfig(ctx.config());
   const logger = api.logger ?? ctx.logger ?? NOOP_LOGGER;
   // 宿主 ctx.now 是本次调用开始的毫秒时间；缺失时才退回墙钟（P-13-10）。
   const clock = api.clock ?? ctx.clock ?? (() => toIso(api.now ?? ctx.now ?? Date.now()));
-  if (warnings.length > 0) logger.warn({ code: 'FASTCFG_INVALID', warnings: [...warnings] });
+  if (warnings.length > 0) logger.warn({ code: 'FASTCFG_INVALID', warnings: [...warnings], errors: [...errors] });
   const tools = createTools({ ctx, settings, clock, logger });
 
   // P-13-14 / P-13-18：工具与页面 action 参数用同一套受限子集，越界就在这里失败。

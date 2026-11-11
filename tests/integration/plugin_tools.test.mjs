@@ -262,6 +262,24 @@ test('P12 非 primaryChatId：observe/state 均 DEGRADED，不写不推进，冷
   assert.ok(result.details.warnings.includes('PRIMARY_UNBOUND'));
 });
 
+test('P-13-20 多主会话设置在保存校验时失效：FASTCFG_INVALID + PRIMARY_UNBOUND，零写入', async () => {
+  const h = makeCtx({ config: { primaryChatId: `${PRIMARY_CHAT},${OTHER_CHAT}` } });
+  const { tools, settings } = install(h.ctx);
+  assert.equal(settings.primaryChatId, '');
+  assert.deepEqual(settings.primaryChatIds, []);
+
+  const configError = h.logs.find((entry) => entry.code === 'FASTCFG_INVALID');
+  assert.equal(configError?.errors?.[0]?.field, 'primaryChatId');
+  assert.match(configError?.errors?.[0]?.message ?? '', /v1 只支持单主会话；多主会话需账号级共享存储/);
+
+  for (const result of [await tools.observe(eventParams()), await tools.state()]) {
+    assert.equal(result.ok, false);
+    assert.equal(result.code, 'DEGRADED');
+    assert.ok(result.details.warnings.includes('PRIMARY_UNBOUND'));
+  }
+  assert.deepEqual(h.storage.keys(), [], '非法多主会话不得退化成多写者或写入任何键');
+});
+
 test('P13 键名合法、单次 ≤40 次操作、set 抛错降级、超限 DEGRADED 且下次 observe 淘汰', async () => {
   const h = makeCtx();
   const { tools } = install(h.ctx);

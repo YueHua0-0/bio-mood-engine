@@ -1,11 +1,11 @@
-# 集成报告（0.1.3）
+# 集成报告（0.1.4 未发布候选）
 
 | 项目 | 内容 |
 | --- | --- |
-| 版本 | 0.1.3 |
+| 版本 | 0.1.4（本地未发布候选） |
 | 日期 | 2026-11-11 |
-| 结论 | 本机端到端链路自测通过（P-13-19 多主会话 + P-13-18 状态页 + E01–E08） |
-| 证据 | `tests/integration/e2e_scenarios.test.mjs`、`e2e_chain.test.mjs`、`release_manifest.test.mjs`、`tests/contract/plugin_ui.test.mjs` |
+| 结论 | 本机端到端链路自测通过（P-13-18 状态页 + E01–E08）；P-13-20 按裁决 A 收窄为单主会话，多值配置 fail-closed，不再宣称跨聊天共享状态；CI 矩阵/10 轮稳定性与真机灰度、回滚演练仍未完成 |
+| 证据 | `tests/integration/e2e_scenarios.test.mjs`、`e2e_chain.test.mjs`、`release_manifest.test.mjs`、`tests/contract/plugin_ui.test.mjs`、`tests/integration/plugin_manifest.test.mjs`、`tests/integration/plugin_tools.test.mjs`、`tests/unit/storage_repo.test.mjs`（S18b） |
 
 > 全部数值、文案与行为均为**虚构角色状态模拟**，不是人体医学模型，不用于诊断、治疗或现实健康预测。
 
@@ -18,7 +18,7 @@
 - `after-response` 为 `off` 时无第二次发送（`plugin_hooks` 用例）。
 - 工具与钩子共享同一份只读快照，权威状态只在主聊天 `state` 键（`e2e_chain` 用同一 storage 串联插件与 HTTP 服务）。
 
-## 2. 七个场景（15 §4.2）
+## 2. 八个场景（15 §4.2）
 
 | 编号 | 结果 | 关键断言 |
 | --- | --- | --- |
@@ -41,27 +41,32 @@
 6. 插件"重启"（新 ctx、同一 storage）读回同一版本。
 7. 日志与 `meta` 均不含完整种子；完整种子只存在于 `state.random`。
 
-## 4. 发布包
+## 4. 本地未发布候选包
 
 | 项 | 实测 | 限额 |
 | --- | --- | --- |
-| ZIP | 155 766 B | ≤8 MiB |
-| 解压 | 418 398 B | ≤16 MiB |
+| ZIP | 157 587 B | ≤8 MiB |
+| 解压 | 422 915 B | ≤16 MiB |
 | 单文件 | ≤ 41 653 B | ≤4 MiB |
 | 条目 | 53 | — |
-| SHA-256 | `B02E641D1F488E51CFD145F4B89E368BD97D8F8054D3A221DD5DAD8BACFEBFDE` | — |
+| SHA-256 | `BD9F8722328A927A4D5835E6F5F5684D980E518D6F02D5A8B2F542E028B39DC6` | — |
+
+> 上表为 2026-11-11 对本地未发布候选 `release/bio-mood-engine-0.1.4.zip` 的实测值；它不是已对外发布版本。V15 按 `plugin.json` 的当前版本检查候选包与 `packPlugin()` 输出逐字节一致，不重写任何历史 ZIP。
 
 - 权限仅 `storage` / `history_read` / `reply`；`configSchema` 13 项（≤24），为「字段名 → Schema」扁平映射，`apiVersion` 为数字 `2`，含 `description`（P-13-08 修正）；Schema 关键词严格落在宿主受限子集内，已移除 `maxItems`（P-13-09）。
 - 入口按官方样例对齐（P-13-10）：`api.registerTool({id, description, parameters, execute(ctx,args)})`，`execute` 仅返回 `{content}`；`hooks` 以宿主单参 `ctx` 调用（`ctx.message` / `ctx.text`）。
 - 包内不含 `tests/`、`docs/`、`package.json`、`node_modules/`、sourcemap。
 - 自包含：适配层与引擎统一放在包内 `lib/`，`index.mjs` 与 `lib/adapter/**` 的引用在打包时重写，测试逐条解析包内相对引用。
-- 插件页面（P-13-18）：`ui.json`（216 B）+ `ui/{page.html,page.js,style.css}` 随包发布；页面只 import 宿主 `__sdk.mjs`，无内联脚本、无外网地址、无 `fetch`/`eval`，数据只走只读 action `read-state`。
-- `release/bio-mood-engine-0.1.2.zip` 与打包器输出逐字节一致（可复现）；`0.1.1` / `0.1.0` / `0.0.9` 作为历史回滚包保留。0.1.2 起打包器放行 `ui/**`，旧包不再参与逐字节复现。
+- 插件页面（P-13-18）：`ui.json`（216 B）+ `ui/{page.html,page.js,style.css}` 随候选包构建；页面只 import 宿主 `__sdk.mjs`，无内联脚本、无外网地址、无 `fetch`/`eval`，数据只走只读 action `read-state`。
+- `0.1.3` / `0.1.2` / `0.1.1` / `0.1.0` / `0.0.9` 作为历史包原样保留；0.1.3 是上一可用回滚包，但生产配置同样只能保留一个 `primaryChatId`。
 
 ## 5. 未覆盖 / 已知限制
 
 - 本机未接入真实微信宿主，E2E 使用宿主上下文替身（`tests/integration/_plugin_helpers.mjs`）。
+- **替身的存储语义与宿主不同**：替身把多个上下文接到同一个 `storage` 对象，宿主的「账号 + 插件 + 聊天」隔离语义无法在替身中验证。P-13-20 已裁决为 v1 单主会话，因此 E2E 不覆盖跨聊天共享状态；该能力不属于 v1 验收范围。
+- 配置层两项/单项/空值与工具层 fail-closed 由 `plugin_manifest` / `plugin_tools` 覆盖；S18b 直接绕过清单传入两个 ID，验证只有首项可写、第二聊天零写入。这些用例验证单写者约束，不冒充真实宿主隔离 E2E。
 - `engineMode=remote` 只有开关与降级映射，未接远程传输。
-- 灰度 C1–C3 与 R1–R4 实机演练需在宿主环境执行，本机只验证了 R2/R4 的等价路径（`enabled=false`、`shadowMode=true`）。
+- CI Node 20 / 22 / 24 矩阵与连续 10 轮稳定性任务已配置，但**尚未取得两次连续绿色结果**；本地测试不能替代 CI 证据。
+- 灰度 C1–C3 与 R1–R4 实机演练**未完成**，需在宿主环境执行；本机只验证了 R2/R4 的等价路径（`enabled=false`、`shadowMode=true`）。
 - 状态页只读：页面 action 的 ctx 没有 `actor.id`，不提供 `tick` / `admin`；状态仍只从主会话读取，非主会话显示降级提示。
 - 其余问题以 `docs/冲突报告与问题台账.md` 为准。

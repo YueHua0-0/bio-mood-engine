@@ -122,7 +122,7 @@ async function readContext(input, ctx, settings) {
   if (settings.engineMode !== 'embedded') return { context: '' };
   const chatId = chatIdOf(ctx);
   const ids = settings.primaryChatIds || [];
-  if (ids.length === 0 || !ids.includes(chatId)) return { context: '' };
+  if (ids.length === 0 || ids[0] !== chatId) return { context: '' };
 
   const repo = createChatRepo({ ctx, settings });
   if (repo.readOnly) return { context: '' };

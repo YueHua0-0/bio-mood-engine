@@ -13,8 +13,9 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
         (all pure functions: explicit inputs, no system clock, no network, no hidden I/O)
 ```
 
-> Current version **0.1.3** · `apiVersion` 2 · **465/465** tests · docs consistency PASS
-> · GitHub mirror: (your repo URL here)
+> Current version **0.1.4 (unpublished candidate)** · `apiVersion` 2 · **490**
+> tests; three local full-suite runs: 490/490, 489/490, 489/490 (T12 only, see §7)
+> · `check-docs` PASS (paths + test IDs only) · GitHub: <https://github.com/YueHua0-0/bio-mood-engine>
 
 ---
 
@@ -44,7 +45,7 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 
 | Item | Requirement |
 | --- | --- |
-| Node.js | **≥ 20** (verified on `v24.19.0`) |
+| Node.js | **≥ 20** (only `v24.19.0` executed so far — the 20/22 matrix is still open, see §7) |
 | Runtime dependencies | **None.** Node built-ins only; no `node_modules`, nothing bundled |
 | Module format | ESM (`.mjs`), no `require()`; no `package.json`, import by path |
 | OS | Windows / macOS / Linux. No platform-specific paths or shell dependencies |
@@ -54,10 +55,12 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 Plugin package limits: ZIP ≤ 8 MiB, unpacked ≤ 16 MiB, single file ≤ 4 MiB,
 ≤ 128 entries, ≤ 8 directory levels.
 
-Current release package (0.1.3):
+Local **unpublished candidate** package (0.1.4):
 
-- **156 911 B** ZIP / **421 394 B** unpacked / **53 entries**
-- SHA-256: `5F33B0A4EC8AFBF34A5D8BE5D9049C7F51DEF0EF055C1081E5164919A8FE481E`
+- **157 587 B** ZIP / **422 915 B** unpacked / **53 entries** / largest file **41 653 B**
+- SHA-256: `BD9F8722328A927A4D5835E6F5F5684D980E518D6F02D5A8B2F542E028B39DC6`
+- Built locally on 2026-11-11; V15 checks that it is byte-identical to
+  `packPlugin()` output. Historical 0.1.3 and earlier ZIPs are left unchanged.
 
 ---
 
@@ -75,19 +78,23 @@ Current release package (0.1.3):
 
 ### 3.2 Runtime semantics
 
-- **Single character, multi-primary shared state** (0.1.3+). Up to 8 primary
-  chat IDs (comma-separated in `primaryChatId`) all read and write the same
-  state — like a real person chatting in multiple conversations at once.
-  Non-primary chats see `NON_PRIMARY_READONLY` and cannot advance state.
-- **Concurrent writes** from two primaries hit the optimistic lock
-  `STATE_VERSION_CONFLICT` and surface as `DEGRADED`.
+- **Single character, single primary chat** (P-13-20, ruling A). Production
+  must configure exactly one `primaryChatId`. Comma/whitespace-separated
+  multiple IDs and multi-item arrays are rejected with `FASTCFG_INVALID` and
+  fall back to the unbound state (`PRIMARY_UNBOUND`); non-primary chats see
+  `NON_PRIMARY_READONLY`. The internal array retains its shape for a possible
+  future account-scoped storage design, but only its first item can be a writer.
+- **Concurrent writes** inside one chat scope hit the optimistic lock
+  `STATE_VERSION_CONFLICT` and surface as `DEGRADED`. The host isolates
+  `ctx.storage` per *account + plugin + chat* (04 §1.1); v1 never attempts
+  cross-chat reads, writes, or shared state.
 - **The delivery queue is in-process and volatile.** It is lost on restart.
   There is no timer: delivery timing is best-effort and is only re-evaluated
   on the next `observe` / `tick`.
 - **First deployment requires pre-configuration.** `adminActorIds` defaults
   to empty, which makes `tick` and every `admin` action return
-  `UNAUTHORIZED`; `bind_primary` cannot bootstrap. Set both `primaryChatId`
-  (comma-separated list supported) and `adminActorIds`.
+  `UNAUTHORIZED`; `bind_primary` cannot bootstrap. Set one `primaryChatId`
+  and `adminActorIds`.
 - **Admin actions never roll back automatically.** Failures write
   `meta.recovery_required`, return `DEGRADED`, and require manual
   intervention; do not retry automatically.
@@ -101,8 +108,11 @@ Current release package (0.1.3):
 
 ### 3.3 Known limitations (ledger items tracked in `docs/冲突报告与问题台账.md`)
 
-Seven open issues at time of writing, none blocking current use. See the
-ledger for full descriptions and adjudication.
+The multi-primary design has been withdrawn under **P-13-20, ruling A**: v1 has
+one authoritative writer and never shares state across chats. **P-15-08 remains
+open for release evidence**: CI matrix/stability results and real-host grey
+release/rollback drills are not complete. See §7 and the ledger before any
+production freeze; local tests are not a substitute for those items.
 
 ---
 
@@ -122,7 +132,7 @@ node tools/sim/run.mjs tools/sim/scenarios/quiet_week.json --out out
 node tools/sim/diff.mjs out/a.trace.jsonl out/b.trace.jsonl
 
 # 5. Build the plugin package
-node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.3.zip
+node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.4.zip
 ```
 
 Simulation CLI exit codes: `0` pass, `1` assertion failure, `2`
@@ -132,16 +142,16 @@ report is a single offline file (no external links, no external scripts).
 
 ### As a WeChatAgent plugin
 
-1. Run `node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.3.zip`.
+1. Run `node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.4.zip`.
 2. In WeChatAgent → Plugins → "Install from file…", pick the ZIP.
 3. Open plugin settings and set:
-   - `primaryChatId` — comma-separated list of chat IDs (e.g.
-     `1689847162,928374615`). These chats share one engine state.
+   - `primaryChatId` — exactly one chat ID (e.g. `1689847162`). Multiple values
+     are rejected and fall back to `PRIMARY_UNBOUND`; chats never share state.
    - `adminActorIds` — comma-separated list of admin `wxid`s.
    - `enabled` — true.
 4. Restart / reload and grant permissions when prompted.
 5. Click "Open" on the plugin card for the read-only state page, or call
-   the `bio-mood-engine__state` tool from any primary chat.
+   the `bio-mood-engine__state` tool from the primary chat.
 
 ---
 
@@ -163,7 +173,7 @@ bio-mood-engine/
 ├── tools/sim/           # parse / run / analyze / render / diff + 8 scenarios
 ├── scripts/             # pack-plugin.mjs (hand-rolled ZIP writer, no deps)
 ├── tests/               # unit / contract / integration / simulation
-├── release/             # 0.1.3 · 0.1.2 · 0.1.1 · 0.1.0 · 0.0.9
+├── release/             # 0.1.4 local candidate · 0.1.3 · 0.1.2 · 0.1.1 · 0.1.0 · 0.0.9
 ├── design/              # offline preview HTML for the state page
 ├── acceptance/          # hands-on acceptance checklist
 ├── docs/                # contracts 00–16, integration reports, runbooks, issue ledger
@@ -183,9 +193,9 @@ bio-mood-engine/
 | [03 — Seeds & PRNG](./docs/03-随机种子与PRNG.md) | PCG32, sub-seed derivation, counters, golden vectors |
 | [04 — Persistence & Idempotency](./docs/04-持久化与事件幂等.md) | Repository interface, transactions, migrations, retention |
 | [12 — API Contract](./docs/12-API服务与接口契约.md) | Four endpoints, auth, rate limiting, error codes |
-| [13 — WeChatAgent Adapter](./docs/13-WeChatAgent插件适配层.md) | Tools/hooks, budgets, degradation, storage keys, packaging, multi-primary semantics |
+| [13 — WeChatAgent Adapter](./docs/13-WeChatAgent插件适配层.md) | Tools/hooks, budgets, degradation, storage keys, packaging, single-primary semantics |
 | [14 — Test Baseline](./docs/14-测试基线与长期仿真.md) | Test layers and case IDs |
-| [15 — Integration & Release](./docs/15-集成联调与发布.md) | E01–E07, rollback, operations, acceptance |
+| [15 — Integration & Release](./docs/15-集成联调与发布.md) | E01–E08, rollback, operations, acceptance |
 | [16 — Simulation & Replay](./docs/16-仿真回放与可视化.md) | Scenario format, A1–A10 checks, M01–M16 gates |
 | [Issue Ledger](./docs/冲突报告与问题台账.md) | Single source of truth: issues, rulings, evidence |
 | [UI Theme Spec](./.trae/documents/明日方舟_罗德岛_UI设计主题规范.md) | Rhode-Island-inspired dark industrial UI spec |
@@ -195,14 +205,29 @@ bio-mood-engine/
 
 ## 7. Current Status
 
+Measured 2026-11-11 on Node `v24.19.0`, Windows, `--test-concurrency=1`.
+
 | Item | Result |
 | --- | --- |
-| `node --test` | **465 pass / 0 fail** (unit + integration + contract) |
-| `node --test tests/simulation/*.test.mjs` | 21/22 pass; T12 pure-chunk gate is a known本机 failure (0.42 vs 0.4 ms/iter on this machine), unrelated to code correctness |
-| `node tools/check-docs.mjs` | PASS (0 missing paths, 0 missing case IDs, 0 whitelisted paths) |
-| End-to-end scenarios E01–E07 | 7/7 pass |
-| State page | read-only, auto-refresh, multi-primary aware |
-| Plugin package | 156 911 B ZIP / 421 394 B unpacked / 53 entries, all internal specifiers resolvable |
+| Full suite, run 1 | **490 / 490 pass**, 36.416 s |
+| Full suite, run 2 | **489 / 490 pass**, T12 failed (0.4052 ms vs 0.4 ms/iter), 34.198 s |
+| Full suite, run 3 | **489 / 490 pass**, T12 failed (0.4082 ms vs 0.4 ms/iter), 34.054 s |
+| Other timing gates | M03 and T17 passed all three runs; T12 is the only failure in runs 2–3. No threshold was changed and no functional assertion failed |
+| Focused P-13-20 tests | 67 / 67 pass, including multi-value fail-closed and the bypass-manifest second-chat read-only case |
+| `node tools/check-docs.mjs` | PASS — scope is **paths and test case IDs only**; it does not verify versions, test counts, hashes or release data |
+| End-to-end scenarios E01–E08 | 8/8 pass (host context harness, not a real host) |
+| State page | read-only, auto-refresh, shows degradation for non-primary chats |
+| 0.1.4 candidate package | 157 587 B ZIP / 422 915 B unpacked / 53 entries; every internal specifier resolves; V15 confirms byte identity with `packPlugin()` |
+
+Real-host cross-chat shared-state E2E is **N/A** under P-13-20 ruling A: v1 has
+one primary writer and does not offer cross-chat shared state. The following
+release evidence is still incomplete and blocks a production freeze:
+
+1. Node 20 / 22 / 24 CI matrix — the workflow exists, but only local `v24.19.0`
+   has executed; two consecutive green CI runs have not been recorded.
+2. Ten consecutive full-suite CI runs — the three local runs do not replace this
+   job, and T17 is only a proxy.
+3. Real WeChat host grey release C1–C3 and drills R1–R4.
 
 ---
 

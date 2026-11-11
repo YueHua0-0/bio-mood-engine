@@ -204,16 +204,16 @@ export function settingProblem(key, value) {
     case 'shadowMode':
       return typeof value === 'boolean' ? null : 'type';
     case 'primaryChatId': {
-      // P-13-19：多主会话，逗号或空白分隔。单项 ≤ 128 字符，合计 ≤ 512 字符，最多 8 项。
+      // P-13-20 裁决 A：v1 只有单主会话；空字符串仍表示未绑定。
       if (Array.isArray(value)) {
-        if (value.length === 0 || value.length > 8) return 'range';
+        if (value.length !== 1) return 'range';
         if (!value.every((item) => typeof item === 'string' && item.length > 0 && item.length <= 128)) return 'range';
         return null;
       }
       if (typeof value !== 'string') return 'type';
-      if (value.length > 512) return 'range';
+      if (value.length > 128) return 'range';
       const ids = primaryIdsOf(value);
-      if (ids.length > 8) return 'range';
+      if (ids.length > 1) return 'range';
       if (!ids.every((item) => item.length <= 128)) return 'range';
       return null;
     }
@@ -357,6 +357,7 @@ function pushUnique(list, code) {
  */
 export function normalizeConfig(raw) {
   const warnings = [];
+  const errors = [];
   const input = isPlainObject(raw) ? raw : {};
   const settings = {
     ...DEFAULT_SETTINGS,
@@ -374,10 +375,19 @@ export function normalizeConfig(raw) {
     const problem = settingProblem(key, value);
     if (problem) {
       pushUnique(warnings, 'FASTCFG_INVALID');
+      const multiplePrimary = key === 'primaryChatId' && primaryIdsOf(value).length > 1;
+      errors.push({
+        code: 'FASTCFG_INVALID',
+        field: key,
+        reason: problem,
+        message: multiplePrimary
+          ? 'v1 只支持单主会话；多主会话需账号级共享存储（见 P-13-20 裁决）'
+          : `配置项 ${key} 非法（${problem}），已回退默认值`
+      });
       continue;
     }
     // P-13-17：设置里填 wxid 明文，这里立即转成 12 位候选哈希，明文只活在 `input` 里。
-    // P-13-19：primaryChatId 运行期同时写字符串原值（debug 用）和数组（判定用）。
+    // P-13-20：primaryChatId 运行期同时写字符串原值（debug 用）和至多一项的数组（判定用）。
     if (key === 'adminActorIds') {
       settings.adminActorIds = adminHashesOf(adminIdsOf(value));
     } else if (key === 'primaryChatId') {
@@ -389,7 +399,7 @@ export function normalizeConfig(raw) {
   }
 
   // 13 §4.3：remote 模式缺地址属于运行时降级，不是配置错误；这里只做快照。
-  return { settings, warnings };
+  return { settings, warnings, errors };
 }
 
 /** 13 §5.4 / §5.9：`cfg` 快照必须脱敏，种子与远程令牌不得落盘。 */

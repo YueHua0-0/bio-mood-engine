@@ -1,0 +1,59 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-matrix:
+    name: Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Full test suite
+        run: node --test --test-concurrency=1
+
+  stability:
+    name: 10 consecutive full-suite runs (Node 24)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run full suite 10 times
+        id: stability
+        shell: bash
+        run: |
+          failures=0
+          : > stability-results.txt
+          for run in $(seq 1 10); do
+            echo "=== stability run ${run}/10 ===" | tee -a stability-results.txt
+            if node --test --test-concurrency=1; then
+              echo "run=${run} result=pass" | tee -a stability-results.txt
+            else
+              failures=$((failures + 1))
+              echo "run=${run} result=fail" | tee -a stability-results.txt
+            fi
+          done
+          echo "failure_count=${failures}" | tee -a stability-results.txt
+          echo "failure_count=${failures}" >> "$GITHUB_OUTPUT"
+          test "${failures}" -eq 0
+      - name: Upload stability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stability-node-24
+          path: stability-results.txt
+          if-no-files-found: error

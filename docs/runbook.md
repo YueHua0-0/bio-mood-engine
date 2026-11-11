@@ -1,12 +1,12 @@
-# 运维手册（0.1.2）
+# 运维手册（0.1.4 未发布候选）
 
-> 本手册适用于 `bio-mood-engine` 0.1.2。全部数值与文案均为**虚构角色状态模拟**，不用于诊断、治疗或现实健康预测。
+> 本手册适用于 `bio-mood-engine` 0.1.4 本地未发布候选。全部数值与文案均为**虚构角色状态模拟**，不用于诊断、治疗或现实健康预测。
 
 ## 1. 安装与 bootstrap
 
-1. 安装 `release/bio-mood-engine-0.1.2.zip`，确认未启用时零代码执行。
+1. 安装本地候选 `release/bio-mood-engine-0.1.4.zip`（**157 587 B**，SHA-256 `BD9F8722…39DC6`），确认未启用时零代码执行；该候选不代表已完成发布验收。
 2. 在宿主设置中**同时**预置：
-   - `primaryChatId`：主聊天会话 ID；
+   - `primaryChatId`：**只填一个**主聊天会话 ID（P-13-20 裁决 A）。填写多个会被设置校验拒绝，记录 `FASTCFG_INVALID` 并回退为空主会话（`PRIMARY_UNBOUND`）；不要尝试用多个聊天共享状态。留空表示全部工具降级；
    - `adminActorIds`：管理员 wxid 明文（可带 `wxid_` 前缀，最多 8 个，逗号分隔）；插件内部转哈希，留空表示不修改、沿用上次填写；
    - `masterSeedHex`：32 位十六进制；留空则由首次 `observe` 生成。
 3. 白名单为空时 `tick` 与全部 `admin` 动作返回 `UNAUTHORIZED`；`bind_primary` 不能用于 bootstrap，必须先手工预置 `primaryChatId`。
@@ -33,7 +33,7 @@
 | R3 | 用 `state_backup` 覆盖 `state`，`state_version` 取备份值 | 校验通过、指纹等于备份 |
 | R4 | `shadowMode=true` 或卸载插件 | 不注入上下文，回复链路不受影响 |
 
-R1/R2 目标 1 分钟内完成；R3 覆盖前必须先备份当前状态；R4 不得删除数据。上一可用包 `release/bio-mood-engine-0.0.9.zip` 保留 ≥30 天。
+R1/R2 目标 1 分钟内完成；R3 覆盖前必须先备份当前状态；R4 不得删除数据。上一可用包 `release/bio-mood-engine-0.1.3.zip`（157 005 B）保留 ≥30 天；回滚后同样只配置一个 `primaryChatId`。R1–R4 真机演练尚未完成，本节是执行手册而非完成证据。
 
 ## 4. 监控与阈值
 
@@ -68,14 +68,15 @@ R1/R2 目标 1 分钟内完成；R3 覆盖前必须先备份当前状态；R4 �
 | 回滚时备份损坏 | 停止 R3，改用 R4 |
 | 升级后设置不兼容 | 版本回退 + 旧包重装，数据保留 |
 | 用户投诉回复异常 | 先停插件，再定位 |
+| 0.1.3 多主会话各自显示不同状态 | 这是已确认的配置/存储分叉风险，不是共享状态：升级到 0.1.4 后把 `primaryChatId` 收缩为单个 chat id，其余聊天只读；多值在 0.1.4 会被拒绝并回退 `PRIMARY_UNBOUND`，不得自动挑选一个继续写入 |
 
 ## 7. 常用命令
 
 ```powershell
-node --test tests                       # 全量回归
+node --test --test-concurrency=1          # 全量回归（Node 24 不能传目录参数）
 node --test tests/integration/e2e_chain.test.mjs
 node --test tests/integration/e2e_scenarios.test.mjs
 node --test tests/integration/release_manifest.test.mjs
 node tools/check-docs.mjs               # 文档与测试路径一致性
-node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.2.zip
+node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.4.zip
 ```

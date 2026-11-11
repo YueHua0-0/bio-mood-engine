@@ -85,14 +85,29 @@ function labelOf(map, key) {
   return map[key] ?? String(key);
 }
 
-function timeText(value, withDate = false) {
+/**
+ * 时钟文本。时间一律按角色声明的时区（`summary.timezone`）呈现：浏览器本地时区
+ * 与服务端时区不一致时，直接 `toLocaleString` 会整体偏移若干小时。
+ * `hourCycle: 'h23'` 用于防止部分引擎在 `hour12:false` 下把零点输出成 24 点（02 §4.2）。
+ */
+function timeText(value, { withDate = false, withSeconds = true, timeZone = '' } = {}) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  const options = withDate
-    ? { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }
-    : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-  return date.toLocaleString('zh-CN', options);
+  const options = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+  if (withDate) {
+    options.month = '2-digit';
+    options.day = '2-digit';
+  }
+  if (withSeconds) options.second = '2-digit';
+  if (timeZone) options.timeZone = timeZone;
+  try {
+    return date.toLocaleString('zh-CN', options);
+  } catch {
+    // 时区名非法时退回查看者本地时区，避免整页因格式化抛错而空白。
+    delete options.timeZone;
+    return date.toLocaleString('zh-CN', options);
+  }
 }
 
 function setLink(text, tone = '') {
@@ -273,7 +288,9 @@ function renderSummary(result) {
   const behavior = result.behavior_context ?? {};
 
   const character = result.character_id ?? summary.character_id ?? '—';
-  const updated = timeText(summary.updated_at);
+  const timeZone = summary.timezone ?? '';
+  // 带日期：状态可能数天未推进，只显示时分秒会让人误读成"当前时间"。
+  const updated = timeText(summary.updated_at, { withDate: true, timeZone });
   setText('identity', `虚构角色 ${character} · 状态版本 v${result.state_version ?? '—'} · 更新于 ${updated}`);
   renderPageTags(summary);
 
@@ -294,7 +311,7 @@ function renderSummary(result) {
   setTag('cycle-tag', ...confidenceTag(cycle.confidence));
 
   setText('sleep-state', labelOf(SLEEP_LABELS, sleep.state));
-  setText('sleep-wake', timeText(sleep.planned_wake_at, true));
+  setText('sleep-wake', timeText(sleep.planned_wake_at, { withDate: true, withSeconds: false, timeZone }));
   applyBar('sleep-debt-bar', sleep.sleep_debt, toneForValue('sleep_debt', sleep.sleep_debt));
   setText('sleep-debt-text', fmt(sleep.sleep_debt, 2));
   applyBar('sleepiness-bar', sleep.sleepiness, toneForValue('sleepiness', sleep.sleepiness));

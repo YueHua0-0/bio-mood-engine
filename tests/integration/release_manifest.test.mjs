@@ -7,6 +7,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { posix } from 'node:path/posix';
 import { fileURLToPath } from 'node:url';
@@ -139,14 +140,22 @@ test('发布包自包含：包内相对引用全部可解析且无第三方依�
   }
 });
 
-test('release/ 当前包与打包器逐字节一致，历史回滚包保留（V15）', async () => {
+test('release/ 当前候选包与打包器逐字节一致，历史回滚包保留（V15）', async (t) => {
+  // `release/` 是本地构建产物，被 .gitignore 排除：干净克隆与 CI 中不存在该目录。
+  // 此时显式跳过，不伪造"通过"；持有产物的机器上仍会执行全部断言。
+  if (!existsSync(join(ROOT, 'release'))) {
+    t.skip('release/ 不在版本库中：跳过字节一致性校验（本地构建候选包后复跑本用例）');
+    return;
+  }
   const packed = await packPlugin();
-  const current = await readFile(join(ROOT, 'release', 'bio-mood-engine-0.1.3.zip'));
-  assert.ok(packed.zip.equals(current), 'bio-mood-engine-0.1.3.zip 与 packPlugin 输出不一致');
-  const info = await stat(join(ROOT, 'release', 'bio-mood-engine-0.1.3.zip'));
+  const version = (await readManifest()).version;
+  const filename = `bio-mood-engine-${version}.zip`;
+  const current = await readFile(join(ROOT, 'release', filename));
+  assert.ok(packed.zip.equals(current), `${filename} 与 packPlugin 输出不一致`);
+  const info = await stat(join(ROOT, 'release', filename));
   assert.equal(info.size, packed.zip.length);
 
-  for (const file of ['bio-mood-engine-0.1.2.zip', 'bio-mood-engine-0.1.1.zip', 'bio-mood-engine-0.1.0.zip', 'bio-mood-engine-0.0.9.zip']) {
+  for (const file of ['bio-mood-engine-0.1.3.zip', 'bio-mood-engine-0.1.2.zip', 'bio-mood-engine-0.1.1.zip', 'bio-mood-engine-0.1.0.zip', 'bio-mood-engine-0.0.9.zip']) {
     const legacy = await stat(join(ROOT, 'release', file));
     assert.ok(legacy.size > 0, `${file} 缺失或为空`);
   }

@@ -626,6 +626,35 @@ test('S18 非主聊天 / 未配置 primary_chat_id → DEGRADED 且不写键', {
   assert.equal(storage.keys().length, 0, '只读降级不得写任何键');
 });
 
+test('S18b 即使绕过清单传入多个 primaryChatIds，也只有首项可写', { skip: SKIP }, async () => {
+  const firstStorage = createMemoryStorage();
+  const first = createChatScopedRepo({
+    storage: firstStorage,
+    characterId: CHARACTER_ID,
+    chatId: 'chat_a',
+    primaryChatIds: ['chat_a', 'chat_b'],
+    clock: () => FIXED_NOW,
+    logger: createLogger()
+  });
+  assert.equal(first.readOnly, undefined);
+  assert.equal((await first.saveState(baseState(), 0)).ok, true);
+
+  const secondStorage = createMemoryStorage();
+  const second = createChatScopedRepo({
+    storage: secondStorage,
+    characterId: CHARACTER_ID,
+    chatId: 'chat_b',
+    primaryChatIds: ['chat_a', 'chat_b'],
+    clock: () => FIXED_NOW,
+    logger: createLogger()
+  });
+  assert.equal(second.readOnly, true);
+  assert.ok(second.warnings.includes('NON_PRIMARY_READONLY'));
+  const rejected = await second.saveState(baseState(), 0);
+  assert.equal(rejected.code, 'DEGRADED');
+  assert.deepEqual(secondStorage.keys(), [], '第二个聊天不得成为写者');
+});
+
 // ---------------------------------------------------------------------------
 // S19–S27：WAL 崩溃点与启动恢复
 // ---------------------------------------------------------------------------

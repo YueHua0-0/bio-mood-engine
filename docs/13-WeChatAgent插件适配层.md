@@ -76,7 +76,7 @@
 | 键 | 类型 | 默认 | 约束 |
 | --- | --- | --- | --- |
 | `enabled` | boolean | `true` | 应用级总开关（与宿主启用状态并行） |
-| `primaryChatId` | string | `""` | 1–128 字符；空表示未绑定，工具返回 `DEGRADED` |
+| `primaryChatId` | string | `""` | v1 仅允许 1 个 chat id，1–128 字符；空表示未绑定，工具返回 `DEGRADED`。逗号/空白分隔的多值或多项数组在配置规范化时触发 `FASTCFG_INVALID` 并回退为空；多主会话需账号级共享存储（P-13-20 裁决 A） |
 | `adminActorIds` | string | `""` | 管理员白名单，**逗号分隔字符串**（宿主设置页只存字符串，P-13-11）：每项填**宿主设置里的 wxid 明文**（P-13-17），插件内部立即转成候选哈希，明文不落盘、不回显。每项生成两个候选（去重）：完整 wxid 与剥掉 `wxid_` 前缀后的主体各自的 `sha256(...)` 前 12 位十六进制——宿主实测 `ctx.actor.id` 是带前缀的完整 wxid，保留裸主体候选是为了让「按字面删掉 `wxid_`」的填法同样命中自己；已写成 12 位哈希的存量值原样接受（大写会归一为小写），不再二次哈希。最多 8 项；整串校验，任一项既不是 `^[0-9a-fA-F]{12}$` 也不满足 `^[A-Za-z][A-Za-z0-9_-]{2,63}$` 则整项回退空数组并告警 `FASTCFG_INVALID`。**留空 = 不修改**：不产生候选，运行时沿用落盘的 `meta.admin_hashes`（最近一次非空设置，在 `observe` 事务内写入）；从未落盘过非空值才全拒（fail-closed，见 §5.9）。 |
 | `characterId` | string | `whale_character` | `^[a-z][a-z0-9_-]{0,63}$`（00 §2.1） |
 | `timezone` | string | `Asia/Shanghai` | IANA 名称，`Intl` 必须接受 |
@@ -200,10 +200,11 @@ setup(api):
 | --- | --- |
 | `ctx.chat.id === primaryChatId` | 权威状态，可推进、可写三键 |
 | `ctx.chat.id !== primaryChatId` | 返回 `DEGRADED` + 本聊天 `meta` 冷快照（可能为 `null`），不推进、不写 `state` |
-| `primaryChatId` 为空 | 所有工具返回 `DEGRADED`，提示运维在宿主设置中预置 `primaryChatId`（`bind_primary` 不能用于 bootstrap，见下） |
+| `primaryChatId` 为空 | 所有工具返回 `DEGRADED` + `PRIMARY_UNBOUND`，提示运维在宿主设置中预置单个 `primaryChatId`（`bind_primary` 不能用于 bootstrap，见下） |
+| `primaryChatId` 含多个值 | 配置规范化/保存校验触发 `FASTCFG_INVALID`，回退为空主会话；不会选择其中一个继续写入 |
 | 同账号多插件实例 | 各自独立存储；宿主无跨聊天通道，"最近快照"只能来自该聊天自身的历史冷快照，不得绕过隔离 |
 
-**第一版只支持单聊天部署**：`bind_primary` 只在当前聊天的 `meta` 生效，无法让其他聊天看到绑定结果；多聊天场景必须由管理员通过 `settings.primaryChatId` 预置，宿主不提供跨聊天发现（04 §5.5）。
+**v1 只允许配置 1 个 `primaryChatId`**：内部数组只使用首项，即使调用方绕过清单传入多个 ID，第二个聊天也为 `NON_PRIMARY_READONLY`。`bind_primary` 只在当前聊天的 `meta` 生效，无法让其他聊天看到绑定结果；宿主按「账号 + 插件 + 聊天」隔离存储，不提供账号级共享存储或跨聊天发现（04 §1.1 / §5.5）。v1 不尝试跨聊天读写或共享状态。
 
 **bootstrap 顺序（v1.7.2）**：`adminActorIds` 默认空 → `admin` 与 `tick` 全部 `UNAUTHORIZED`；`bind_primary` 本身也是 admin 动作、同样受白名单约束，因此**不能**用来完成首次绑定。首次部署必须由运维在宿主设置里同时预置 `settings.primaryChatId` 与 `settings.adminActorIds`；`primaryChatId` 已填而白名单为空时，`observe`/`state` 正常，`tick`/`admin` 一律拒绝。
 

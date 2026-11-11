@@ -19,13 +19,14 @@ export function actorIdOf(ctx) {
  * @returns repo；未绑定 primary 或非主聊天时为 `readOnly:true` 的降级桩。
  */
 export function createChatRepo({ ctx, settings, clock, logger, migrations = null }) {
+  const configuredIds = Array.isArray(settings.primaryChatIds) ? settings.primaryChatIds : [];
+  const primaryChatId = configuredIds[0] ?? settings.primaryChatId ?? '';
   return createChatScopedRepo({
     storage: ctx.storage,
     characterId: settings.characterId,
     chatId: chatIdOf(ctx),
-    // P-13-19：多主会话共享引擎，settings.primaryChatIds 由 normalizeConfig 产出。
-    primaryChatIds: settings.primaryChatIds,
-    primaryChatId: settings.primaryChatId,
+    // P-13-20 裁决 A：对外只取单值；内部仍用数组，便于未来账号级存储方案平滑过渡。
+    primaryChatIds: primaryChatId ? [primaryChatId] : [],
     config: { timezone: settings.timezone },
     clock,
     logger,

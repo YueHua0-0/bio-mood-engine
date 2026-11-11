@@ -59,6 +59,30 @@ test('P-13-11 adminActorIds 接受逗号分隔字符串并归一成小写数组'
   assert.ok(normalizeConfig({ adminActorIds: nine }).warnings.includes('FASTCFG_INVALID'));
 });
 
+test('P-13-20 v1 单主会话：两项 FASTCFG_INVALID，一项有效，空值保持未绑定', () => {
+  for (const value of ['chat_a,chat_b', 'chat_a chat_b', ['chat_a', 'chat_b']]) {
+    const result = normalizeConfig({ primaryChatId: value });
+    assert.ok(result.warnings.includes('FASTCFG_INVALID'));
+    assert.equal(result.settings.primaryChatId, '');
+    assert.deepEqual(result.settings.primaryChatIds, []);
+    const error = result.errors.find((item) => item.field === 'primaryChatId');
+    assert.equal(error?.code, 'FASTCFG_INVALID');
+    assert.match(error?.message ?? '', /v1 只支持单主会话；多主会话需账号级共享存储（见 P-13-20 裁决）/);
+  }
+
+  for (const value of ['chat_a', ['chat_a']]) {
+    const result = normalizeConfig({ primaryChatId: value });
+    assert.deepEqual(result.warnings, []);
+    assert.deepEqual(result.errors, []);
+    assert.deepEqual(result.settings.primaryChatIds, ['chat_a']);
+  }
+
+  const empty = normalizeConfig({ primaryChatId: '' });
+  assert.deepEqual(empty.warnings, []);
+  assert.deepEqual(empty.errors, []);
+  assert.deepEqual(empty.settings.primaryChatIds, []);
+});
+
 test('P-13-17 设置里填 wxid 明文，插件内部转双候选哈希', () => {
   // 完整 wxid：sha256("wxid_b47wq155j24u22")[:12] === d4c0c02f72c6（现网 S4 靠它通过）。
   const full = normalizeConfig({ adminActorIds: 'wxid_b47wq155j24u22' }).settings.adminActorIds;

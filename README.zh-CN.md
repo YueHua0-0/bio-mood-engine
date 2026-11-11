@@ -9,7 +9,7 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
         (全部纯函数：显式输入，无系统时间、无网络、无隐式 I/O)
 ```
 
-> 当前版本 `0.1.0` · `apiVersion` 2 · 测试 470/470 · 文档一致性核对 PASS
+> 当前版本 `0.1.4`（**本地未发布候选**） · `apiVersion` 2 · 测试 490；本地三轮全量依次为 490/490、489/490、489/490（仅 T12，见 §7） · `check-docs` PASS（仅路径与用例编号）
 
 ---
 
@@ -35,7 +35,7 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 | 宿主 | **WeChatAgent 插件 API v2**（`plugin.json` 的 `apiVersion: "2"`），权限：`storage` / `history_read` / `reply` |
 | 文本编码 | UTF-8 / LF；时间一律 UTC ISO 8601 毫秒（`…Z`） |
 
-插件包硬限制：ZIP ≤ 8 MiB、解压 ≤ 16 MiB、单文件 ≤ 4 MiB、条目 ≤ 128、目录层级 ≤ 8。当前发布包实测 137 105 B / 49 条目。
+插件包硬限制：ZIP ≤ 8 MiB、解压 ≤ 16 MiB、单文件 ≤ 4 MiB、条目 ≤ 128、目录层级 ≤ 8。0.1.4 **本地未发布候选包**实测 157 587 B / 解压 422 915 B / 53 条目，SHA-256 `BD9F8722328A927A4D5835E6F5F5684D980E518D6F02D5A8B2F542E028B39DC6`；历史 ZIP 不改写。
 
 ---
 
@@ -53,27 +53,22 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 
 ### 3.2 运行语义限制
 
-- **单角色、单实例**：同一 `storage` 上并发写会触发乐观锁 `STATE_VERSION_CONFLICT`，表现为 `DEGRADED`。
+- **单角色、单主会话（P-13-20 裁决 A）**：生产只配置一个 `primaryChatId`。逗号/空白分隔的多个 ID 或多项数组会触发 `FASTCFG_INVALID` 并回退为空主会话（`PRIMARY_UNBOUND`）；非主会话为 `NON_PRIMARY_READONLY`。内部仍保留数组形状，但只有首项可写。同一聊天作用域内并发写会触发乐观锁 `STATE_VERSION_CONFLICT`，表现为 `DEGRADED`；v1 不进行跨聊天读写或共享状态。
 - **排队的交付是进程内易失队列**：重启即丢；不依赖定时器，不承诺准点送达，只在下一次 `observe` / `tick` 时重估。
-- **首次部署必须预置配置**：`adminActorIds` 默认为空，此时 `tick` 与全部 `admin` 动作一律 `UNAUTHORIZED`，且 `bind_primary` 不能用于引导。请同时配置 `primaryChatId` 与 `adminActorIds`。
+- **首次部署必须预置配置**：`adminActorIds` 默认为空，此时 `tick` 与全部 `admin` 动作一律 `UNAUTHORIZED`，且 `bind_primary` 不能用于引导。请同时配置单个 `primaryChatId` 与 `adminActorIds`。
 - **管理动作失败不自动回滚**：写入 `meta.recovery_required` 并返回 `DEGRADED`，需人工介入，禁止自动重试。
 - **`after-response` 默认关闭**，且需要 `reply` 权限才可启用。
 - **HTTP 入口**：请求体 ≤ 64 KiB；幂等记录保留 7 天；`tick` / `admin` 的 body 不接受 `api_version` 与 `actor_id`。
 - **数值范围**：所有持久化数值为 `[0, 1]` 浮点，`0–100` 只用于展示层。
 
-### 3.3 已知限制（台账待裁决 7 项）
+### 3.3 已知限制与发布证据
 
-| 编号 | 摘要 |
-| --- | --- |
-| P-13-07 | 排队项未存 `deliver_after`/`expires_at`，`expired` 原因码不可达 |
-| P-13-04 | bootstrap 与首轮推进同事务的约束只写在台账，未写进 13 §5.2 |
-| P-09-01 | `dt=0` 事件轮仍叠加 ≤0.008/维噪声，与 13 §5.9 描述不符 |
-| P-11-02 | 无事件时仍需读 sleep 计算诊断性 `wake_cost`，与 11 §5.3「不读 sleep」冲突 |
-| P-16-04 | 离线场景首夜连续清醒 39 小时 |
-| P-15-01 | `events` 接受 `api_version`，`tick`/`admin` 拒绝，文档未写明 |
-| P-14-04 | 周期回绕容差、`STORAGE_FAILED` 上抛、迁移失败只到 `recovery_required` 三处实现口径待确认 |
+- P-13-20 已按裁决 A 收窄为单主会话；跨聊天共享状态不再是 v1 能力，真实宿主跨聊天共享 E2E 为 **N/A**。
+- P-15-08 的 Node 20 / 22 CI 矩阵与全量连续 10 轮稳定性仍为**未完成**；工作流已配置，但两次连续绿色前不算关闭。
+- 真机灰度 C1–C3 与回滚演练 R1–R4 仍为**未完成**，当前 E2E 证据来自宿主上下文替身。
+- 本轮仅 T12 在第 2/3 轮超过 0.4 ms/次；M03 与 T17 三轮均通过。既有计时门禁仍会随负载波动，未通过修改阈值隐去失败。
 
-完整描述、代码段与裁决选项见 [冲突报告与问题台账](./docs/冲突报告与问题台账.md)。
+完整描述、代码段、裁决与实测证据见 [冲突报告与问题台账](./docs/冲突报告与问题台账.md)。
 
 ---
 
@@ -93,7 +88,7 @@ node tools/sim/run.mjs tools/sim/scenarios/quiet_week.json --out out
 node tools/sim/diff.mjs out/a.trace.jsonl out/b.trace.jsonl
 
 # 5. 打插件包
-node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.0.zip
+node scripts/pack-plugin.mjs --out release/bio-mood-engine-0.1.4.zip
 ```
 
 仿真 CLI 退出码：`0` 通过、`1` 断言失败、`2` 非确定性、`3` 输入非法。产物写入 `<out>/<scenario_id>.{trace.jsonl,report.json,contrib.json,html}`，HTML 为离线单文件（无外链、无外部脚本）。
@@ -113,7 +108,7 @@ bio-mood-engine/
 ├── tools/sim/           # parse / run / analyze / render / diff + 8 个场景
 ├── scripts/             # pack-plugin.mjs（自研 ZIP，无依赖）
 ├── tests/               # unit / contract / integration / simulation
-├── release/             # 0.1.0 发布包与 0.0.9 回滚包
+├── release/             # 0.1.4 本地候选与 0.1.3–0.0.9 历史包
 └── docs/                # 00–16 契约与台账
 ```
 
@@ -130,7 +125,7 @@ bio-mood-engine/
 | [12-API 服务与接口契约](./docs/12-API服务与接口契约.md) | 四个端点、鉴权、限流、错误码 |
 | [13-WeChatAgent 插件适配层](./docs/13-WeChatAgent插件适配层.md) | 工具/钩子、预算、降级、存储键、打包 |
 | [14-测试基线与长期仿真](./docs/14-测试基线与长期仿真.md) | 测试分层与用例编号 |
-| [15-集成联调与发布](./docs/15-集成联调与发布.md) | E01–E07、回滚、运维、验收 |
+| [15-集成联调与发布](./docs/15-集成联调与发布.md) | E01–E08、回滚、运维、验收 |
 | [16-仿真回放与可视化](./docs/16-仿真回放与可视化.md) | 场景格式、A1–A10 异常检测、M01–M16 门禁 |
 | [冲突报告与问题台账](./docs/冲突报告与问题台账.md) | 唯一状态源：问题、裁决、验证证据 |
 
@@ -138,10 +133,18 @@ bio-mood-engine/
 
 ## 7. 当前验收状态
 
+2026-11-11 实测，Node `v24.19.0`，`--test-concurrency=1`。
+
 | 项 | 结果 |
 | --- | --- |
-| `node --test` | 470 pass / 0 fail |
-| `node tools/check-docs.mjs` | PASS（缺失路径 0、缺失用例编号 0、白名单路径 0） |
-| 端到端场景 E01–E07 | 7/7 通过 |
-| 365 天仿真 | 2 428 ms（门禁 < 8 s） |
-| 插件包 | 137 105 B / 解压 363 378 B / 49 条目，包内相对引用可全部解析 |
+| 全量第 1 轮 | 490/490 通过，36.416 s |
+| 全量第 2 轮 | 489/490 通过；T12 纯 chunk 0.4052 ms/次 > 0.4 ms/次，34.198 s |
+| 全量第 3 轮 | 489/490 通过；T12 纯 chunk 0.4082 ms/次 > 0.4 ms/次，34.054 s |
+| 其他计时门禁 | M03 与 T17 三轮均通过；只有 T12 在第 2/3 轮失败，三轮功能性断言均无失败，未修改阈值 |
+| P-13-20 聚焦测试 | 67/67 通过，覆盖多值 fail-closed 与绕过清单时第二聊天只读、零写入 |
+| `node tools/check-docs.mjs` | PASS —— 只校验路径与用例编号，不校验版本号、用例数量、哈希与发布数据 |
+| 端到端场景 E01–E08 | 8/8 通过（宿主上下文替身，非真实宿主） |
+| 365 天仿真 | 第 1 轮 3 395.2 ms（门禁 < 8 s） |
+| 0.1.4 候选包 | 157 587 B / 解压 422 915 B / 53 条目，包内相对引用可全部解析，V15 逐字节一致 |
+
+真实宿主跨聊天共享状态 E2E 在 P-13-20 裁决 A 后为 **N/A**：v1 只有一个主写者，不提供跨聊天共享。以下发布证据仍**未完成**，阻塞生产冻结：Node 20 / 22 / 24 CI 矩阵（两次连续绿色未取得）、CI 全量连续 10 轮稳定性（本地三轮不能替代）、真机灰度 C1–C3 与演练 R1–R4。
