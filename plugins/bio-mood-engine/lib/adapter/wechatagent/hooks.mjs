@@ -84,7 +84,8 @@ export function behaviorInputsFromState(state) {
       stability: state.mood.stability,
       sensitivity: state.mood.sensitivity,
       social_drive: state.mood.social_drive,
-      closeness_need: state.mood.closeness_need
+      closeness_need: state.mood.closeness_need,
+      physical_comfort: state.mood.physical_comfort
     },
     stress: { level: state.stress.level },
     sleep: {
