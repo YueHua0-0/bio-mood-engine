@@ -367,28 +367,28 @@ test('C2-E EC1-A3：支撑矩阵由真实 phase_vector 复核（不为零支撑�
 const EC2_CASES = [
   {
     name: 'pain_sensitivity',
-    value: 1.5,
+    values: [0, 1.5],
     direct: ['physical_comfort', 'energy'],
     feedbackReach: ['social_drive', 'closeness_need'],
     strictEqual: ['stability', 'sensitivity', 'stress']
   },
   {
     name: 'luteal_sensitivity',
-    value: 1.5,
+    values: [0, 1.5],
     direct: ['stability', 'sensitivity'],
     feedbackReach: [],
     strictEqual: ['energy', 'social_drive', 'closeness_need', 'physical_comfort', 'stress']
   },
   {
     name: 'mood_variability',
-    value: 1.5,
+    values: [0, 1.5],
     direct: ['stability', 'sensitivity', 'social_drive'],
     feedbackReach: [],
     strictEqual: ['energy', 'closeness_need', 'physical_comfort', 'stress']
   },
   {
     name: 'intimacy_variability',
-    value: 1.5,
+    values: [0, 1.5],
     direct: ['closeness_need'],
     feedbackReach: ['social_drive'],
     strictEqual: ['energy', 'stability', 'sensitivity', 'physical_comfort', 'stress']
@@ -417,32 +417,38 @@ function runSequence(profile, steps = STEPS_56) {
 test('C2-E EC2：56 步序列中严格相等集合保持相等，直接影响与反馈维出现真实差异', () => {
   const baseline = runSequence(null);
 
+  // 每个参数跑两档：0（关闭调制）与 1.5（上界），基线为四参数默认 1.0。
   for (const item of EC2_CASES) {
-    const variant = runSequence({ [item.name]: item.value });
-    const maxDiff = Object.fromEntries(MOOD_KEYS.map((dim) => [dim, 0]));
+    for (const value of item.values) {
+      const label = `${item.name}=${value}`;
+      const variant = runSequence({ [item.name]: value });
+      const maxDiff = Object.fromEntries(MOOD_KEYS.map((dim) => [dim, 0]));
 
-    for (let i = 0; i < baseline.length; i += 1) {
-      const a = baseline[i];
-      const b = variant[i];
+      for (let i = 0; i < baseline.length; i += 1) {
+        const a = baseline[i];
+        const b = variant[i];
 
-      // 周期轨迹必须完全相同：profile 只作用于 phase_vector，不得影响周期推进。
-      assert.equal(a.cycle.cycle_day, b.cycle.cycle_day, `${item.name}: 第 ${i} 步 cycle_day 漂移`);
-      assert.equal(a.cycle.phase, b.cycle.phase, `${item.name}: 第 ${i} 步 phase 漂移`);
+        // 周期轨迹必须完全相同：profile 只作用于 phase_vector，不得影响周期推进。
+        assert.equal(a.cycle.cycle_day, b.cycle.cycle_day, `${label}: 第 ${i} 步 cycle_day 漂移`);
+        assert.equal(a.cycle.phase, b.cycle.phase, `${label}: 第 ${i} 步 phase 漂移`);
 
-      for (const dim of MOOD_KEYS) {
-        maxDiff[dim] = Math.max(maxDiff[dim], Math.abs(a.mood[dim] - b.mood[dim]));
+        for (const dim of MOOD_KEYS) {
+          maxDiff[dim] = Math.max(maxDiff[dim], Math.abs(a.mood[dim] - b.mood[dim]));
+        }
+        assertMoodEqual(a.mood, b.mood, item.strictEqual, `${label} 第 ${i} 步严格相等`);
       }
-      assertMoodEqual(a.mood, b.mood, item.strictEqual, `${item.name} 第 ${i} 步严格相等`);
-    }
 
-    for (const dim of item.direct) {
-      assert.ok(maxDiff[dim] > 1e-6, `${item.name}: 直接维度 ${dim} 全程无差异（测试失效）`);
-    }
-    for (const dim of item.feedbackReach) {
-      assert.ok(
-        maxDiff[dim] > 1e-6,
-        `${item.name}: 反馈维度 ${dim} 全程无差异（未观察到反馈传播，不设幅值阈值，只要求非零）`
-      );
+      // 只判定“差异是否存在”：mood 值经 round6，非零差异的最小可表示单位即 1e-6，
+      // 因此 maxDiff > 0 等价于“存在差异”，不引入额外的业务幅值阈值。
+      for (const dim of item.direct) {
+        assert.ok(maxDiff[dim] > 0, `${label}: 直接维度 ${dim} 全程无差异（测试失效）`);
+      }
+      for (const dim of item.feedbackReach) {
+        assert.ok(
+          maxDiff[dim] > 0,
+          `${label}: 反馈维度 ${dim} 全程无差异（未观察到反馈传播，只要求非零）`
+        );
+      }
     }
   }
 });
@@ -744,4 +750,89 @@ test('C2-E EC6-B：ps → energy（第 1 步）→ social_reassurance_drive（�
   // 同 tick 的第二跳出口：SRD 同时写入 social_drive 与 closeness_need。
   assert.ok(b2.state.mood.social_drive < a2.state.mood.social_drive, 'SRD 下降应压低 social_drive');
   assert.ok(b2.state.mood.closeness_need < a2.state.mood.closeness_need, 'SRD 下降应压低 closeness_need');
+});
+
+test('C2-E EC6-C：iv → closeness_need（第 1 步）→ social_reassurance_drive（第 2 步）', () => {
+  const base = anchoredState({ day: 15 }); // ovulatory，intimacy 分量 0.35
+  const t1 = new Date(Date.parse(T0) + HOUR_MS).toISOString();
+  const t2 = new Date(Date.parse(T0) + 2 * HOUR_MS).toISOString();
+  const profile = { intimacy_variability: 1.5 };
+
+  const a1 = advanceOnce(base, { profile: null, now: t1 });
+  const b1 = advanceOnce(base, { profile, now: t1 });
+  assert.deepEqual(a1.state.regulation, b1.state.regulation, '第 1 步不得出现 cycle→regulation 的同 tick 反馈');
+  assert.ok(b1.state.mood.closeness_need > a1.state.mood.closeness_need, '第 1 步 closeness_need 必须上升');
+
+  // 第 1 步是纯直接映射：除 closeness_need 外六维必须精确相等。
+  for (const dim of MOOD_KEYS) {
+    if (dim === 'closeness_need') continue;
+    assert.equal(
+      b1.state.mood[dim],
+      a1.state.mood[dim],
+      `第 1 步 ${dim} 不应被 intimacy 直接影响`
+    );
+  }
+
+  // 第 2 步从各自第 1 步输出继续推进。
+  const a2 = advanceOnce(a1.state, { profile: null, now: t2 });
+  const b2 = advanceOnce(b1.state, { profile, now: t2 });
+  assert.ok(a2.state.cycle.cycle_day > a1.state.cycle.cycle_day, '第 2 步必须从第 1 步输出继续推进');
+
+  // 图结构：closeness_need 上升 → SRD 上升；其余五个 regulation 维精确相等。
+  const regA = regOf(a2.state);
+  const regB = regOf(b2.state);
+  assert.ok(
+    regB.social_reassurance_drive > regA.social_reassurance_drive,
+    'closeness_need 上升应经 mood_lag 推高 social_reassurance_drive'
+  );
+  for (const key of REGULATION_KEYS) {
+    if (key === 'social_reassurance_drive') continue;
+    assert.equal(regB[key], regA[key], `${key}: 第 2 步不应被 closeness_need 路径影响`);
+  }
+
+  // 同 tick 出口：SRD 上升应推高 social_drive；
+  // closeness_need 自身同时受 recovery 拉动，净方向不稳定，因此断言其 regulation 来源增量。
+  assert.ok(b2.state.mood.social_drive > a2.state.mood.social_drive, 'SRD 上升应推高 social_drive');
+  assert.ok(
+    b2.diagnostics.contributions['mood.closeness_need'].regulation >
+      a2.diagnostics.contributions['mood.closeness_need'].regulation,
+    'SRD 上升应推高 closeness_need 的 regulation 来源'
+  );
+});
+
+test('C2-E EC6-D：mv → stability（第 1 步）→ threat_sensitivity（第 2 步）', () => {
+  const base = anchoredState({ day: 10 }); // follicular，anx/irr/pos 均非零
+  const t1 = new Date(Date.parse(T0) + HOUR_MS).toISOString();
+  const t2 = new Date(Date.parse(T0) + 2 * HOUR_MS).toISOString();
+  const profile = { mood_variability: 1.5 };
+
+  const a1 = advanceOnce(base, { profile: null, now: t1 });
+  const b1 = advanceOnce(base, { profile, now: t1 });
+  assert.deepEqual(a1.state.regulation, b1.state.regulation, '第 1 步不得出现 cycle→regulation 的同 tick 反馈');
+  assert.ok(b1.state.mood.stability > a1.state.mood.stability, '第 1 步 stability 必须上升（直接映射）');
+  assert.ok(b1.state.mood.sensitivity < a1.state.mood.sensitivity, '第 1 步 sensitivity 必须下降（直接映射）');
+  assert.ok(b1.state.mood.social_drive > a1.state.mood.social_drive, '第 1 步 social_drive 必须上升（直接映射）');
+
+  // 第 1 步是纯直接映射：其余四维必须精确相等。
+  for (const dim of ['energy', 'closeness_need', 'physical_comfort', 'stress']) {
+    assert.equal(b1.state.mood[dim], a1.state.mood[dim], `第 1 步 ${dim} 不应被 mv 直接影响`);
+  }
+
+  // 第 2 步从各自第 1 步输出继续推进。
+  const a2 = advanceOnce(a1.state, { profile: null, now: t2 });
+  const b2 = advanceOnce(b1.state, { profile, now: t2 });
+  assert.ok(a2.state.cycle.cycle_day > a1.state.cycle.cycle_day, '第 2 步必须从第 1 步输出继续推进');
+
+  // 图结构：stability 上升 → threat_sensitivity 下降；其余五个 regulation 维精确相等。
+  const regA = regOf(a2.state);
+  const regB = regOf(b2.state);
+  assert.ok(
+    regB.threat_sensitivity < regA.threat_sensitivity,
+    'stability 上升应经 mood_lag 压低 threat_sensitivity'
+  );
+  for (const key of REGULATION_KEYS) {
+    if (key === 'threat_sensitivity') continue;
+    assert.equal(regB[key], regA[key], `${key}: 第 2 步不应被 stability 路径影响`);
+  }
+  assert.ok(b2.state.mood.sensitivity < a2.state.mood.sensitivity, '第 2 步 sensitivity 必须仍低于对照组');
 });
