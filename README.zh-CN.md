@@ -2,6 +2,15 @@
 
 [English](./README.md) | 简体中文
 
+[![Stars](https://img.shields.io/github/stars/YueHua0-0/bio-mood-engine?style=flat-square&logo=github)](https://github.com/YueHua0-0/bio-mood-engine/stargazers)
+[![Forks](https://img.shields.io/github/forks/YueHua0-0/bio-mood-engine?style=flat-square&logo=github)](https://github.com/YueHua0-0/bio-mood-engine/forks)
+[![License](https://img.shields.io/github/license/YueHua0-0/bio-mood-engine?style=flat-square)](./LICENSE)
+![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A520-339933?style=flat-square&logo=node.js)
+![ESM](https://img.shields.io/badge/Module-ESM-blue?style=flat-square)
+![Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen?style=flat-square)
+
+**当前版本 0.1.4 · 本地未发布候选** · `apiVersion` 2
+
 一个用 **纯 ESM JavaScript、零第三方依赖** 实现的角色状态引擎：把「生理周期 / 睡眠 / 事件压力 / 神经调节 / 情绪 / 行为倾向 / 消息交付策略」拆成 8 个纯函数模块，用确定性随机与单一状态源保证「同输入 → 同输出」。可作为库、HTTP 服务或 WeChatAgent 插件三种形态运行。
 
 ```text
@@ -9,7 +18,13 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
         (全部纯函数：显式输入，无系统时间、无网络、无隐式 I/O)
 ```
 
-> 当前版本 `0.1.4`（**本地未发布候选**） · `apiVersion` 2 · 测试 490；本地三轮全量依次为 490/490、489/490、489/490（仅 T12，见 §7） · `check-docs` PASS（仅路径与用例编号）
+## 核心能力
+
+- **确定性仿真** — 同输入永远得到同一状态推进；无隐式 I/O、无系统时间、无网络。
+- **模块化纯函数架构** — 8 个松耦合模块（周期 → 睡眠 → 压力 → 调节 → 情绪 → 行为 → 交付），每个显式输入、显式输出。
+- **可复现回放** — 每次仿真自动生成 trace、贡献报告与离线 HTML 可视化。
+- **多种集成形态** — 可作库调用、可挂载为 HTTP 服务、可部署为 WeChatAgent 插件。
+- **零运行时依赖** — 无 `node_modules`、不打包、仅用 Node 内置模块。
 
 ---
 
@@ -120,7 +135,7 @@ bio-mood-engine/
 | --- | --- |
 | [00-统一契约](./docs/00-统一契约.md) | 全局数据模型、时间、数值、随机、错误、API 信封（最高契约） |
 | [02-核心数据模型与时间协调器](./docs/02-核心数据模型与时间协调器.md) | 状态 schema、时钟、更新流水线、离线推进 |
-| [03-随机种子与 PRNG](./docs/03-随机种子与PRNG.md) | PCG32、子种子派生、计数器、金向量 |
+| [03-随机种子与 PRNG](./docs/03-随机种子与PRNG.md) | PCG32、子种子派生、计数器、黄金向量 |
 | [04-持久化与事件幂等](./docs/04-持久化与事件幂等.md) | 仓库接口、事务、迁移、保留策略 |
 | [12-API 服务与接口契约](./docs/12-API服务与接口契约.md) | 四个端点、鉴权、限流、错误码 |
 | [13-WeChatAgent 插件适配层](./docs/13-WeChatAgent插件适配层.md) | 工具/钩子、预算、降级、存储键、打包 |
@@ -129,6 +144,8 @@ bio-mood-engine/
 | [16-仿真回放与可视化](./docs/16-仿真回放与可视化.md) | 场景格式、A1–A10 异常检测、M01–M16 门禁 |
 | [未裁决与未闭环问题台账](./docs/冲突报告与问题台账_未裁决.md) | 当前交接单：待裁决及已裁决、契约已改、代码已改等未闭环事项 |
 | [已验证问题台账（含驳回）](./docs/冲突报告与问题台账_已验证.md) | 历史归档：已验证与驳回条目、裁决及验证证据 |
+| [UI 主题规范](./.trae/documents/明日方舟_罗德岛_UI设计主题规范.md) | 罗德岛风格深色工业 UI 设计规范 |
+| [CHANGELOG](./CHANGELOG.md) | 版本历史 |
 
 ---
 

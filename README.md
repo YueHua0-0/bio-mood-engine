@@ -2,6 +2,15 @@
 
 English | [简体中文](./README.zh-CN.md)
 
+[![Stars](https://img.shields.io/github/stars/YueHua0-0/bio-mood-engine?style=flat-square&logo=github)](https://github.com/YueHua0-0/bio-mood-engine/stargazers)
+[![Forks](https://img.shields.io/github/forks/YueHua0-0/bio-mood-engine?style=flat-square&logo=github)](https://github.com/YueHua0-0/bio-mood-engine/forks)
+[![License](https://img.shields.io/github/license/YueHua0-0/bio-mood-engine?style=flat-square)](./LICENSE)
+![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A520-339933?style=flat-square&logo=node.js)
+![ESM](https://img.shields.io/badge/Module-ESM-blue?style=flat-square)
+![Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen?style=flat-square)
+
+**Current version 0.1.4 · Unpublished Candidate** · `apiVersion` 2
+
 A **pure ESM JavaScript engine with zero third-party dependencies**. It splits
 cycles, sleep, event stress, neuromodulation, mood, behavioral tendency and
 delivery policy into 8 pure-function modules, then adds deterministic
@@ -13,9 +22,13 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
         (all pure functions: explicit inputs, no system clock, no network, no hidden I/O)
 ```
 
-> Current version **0.1.4 (unpublished candidate)** · `apiVersion` 2 · **490**
-> tests; three local full-suite runs: 490/490, 489/490, 489/490 (T12 only, see §7)
-> · `check-docs` PASS (paths + test IDs only) · GitHub: <https://github.com/YueHua0-0/bio-mood-engine>
+## Core Features
+
+- **Deterministic Simulation** — Same input always produces the same state progression; no hidden I/O, no system clock, no network.
+- **Modular Pure-Function Architecture** — 8 loosely-coupled modules (cycle → sleep → stress → regulation → mood → behavior → delivery); each accepts explicit inputs and returns explicit outputs.
+- **Reproducible Replay** — Scenario traces, contribution reports and offline HTML visualization for every simulation run.
+- **Multiple Integration Modes** — Use as a library, mount as an HTTP service, or deploy as a WeChatAgent plugin.
+- **Zero Runtime Dependencies** — No `node_modules`, nothing bundled; Node built-ins only.
 
 ---
 
@@ -45,7 +58,7 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 
 | Item | Requirement |
 | --- | --- |
-| Node.js | **≥ 20** (only `v24.19.0` executed so far — the 20/22 matrix is still open, see §7) |
+| Node.js | **≥ 20** (only `v24.19.0` executed so far — the 20/22 matrix is still open, see §7). On Node 24, `node --test tests` treats the directory as a module and throws `MODULE_NOT_FOUND`; use `node --test` instead |
 | Runtime dependencies | **None.** Node built-ins only; no `node_modules`, nothing bundled |
 | Module format | ESM (`.mjs`), no `require()`; no `package.json`, import by path |
 | OS | Windows / macOS / Linux. No platform-specific paths or shell dependencies |
@@ -218,6 +231,7 @@ Measured 2026-11-11 on Node `v24.19.0`, Windows, `--test-concurrency=1`.
 | `node tools/check-docs.mjs` | PASS — scope is **paths and test case IDs only**; it does not verify versions, test counts, hashes or release data |
 | End-to-end scenarios E01–E08 | 8/8 pass (host context harness, not a real host) |
 | State page | read-only, auto-refresh, shows degradation for non-primary chats |
+| 365-day simulation | Run 1: **3 395.2 ms** (gate < 8 s) |
 | 0.1.4 candidate package | 157 587 B ZIP / 422 915 B unpacked / 53 entries; every internal specifier resolves; V15 confirms byte identity with `packPlugin()` |
 
 Real-host cross-chat shared-state E2E is **N/A** under P-13-20 ruling A: v1 has
