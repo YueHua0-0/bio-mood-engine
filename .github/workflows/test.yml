@@ -11,14 +11,14 @@ permissions:
 jobs:
   node-matrix:
     name: Node ${{ matrix.node-version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         node-version: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
       - name: Record runner environment
@@ -35,10 +35,10 @@ jobs:
 
   stability:
     name: 10 consecutive full-suite runs (Node 24)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
       - name: Record runner environment
@@ -70,7 +70,7 @@ jobs:
           test "${failures}" -eq 0
       - name: Upload stability report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: stability-node-24
           path: stability-results.txt
