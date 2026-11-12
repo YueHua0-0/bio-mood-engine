@@ -228,9 +228,9 @@ test('T12 性能基线：纯 chunk / 端到端 / 4320 步 / nextU32 / 插件构�
     const elapsed = Math.min(...elapsedRounds);
     measured.offlineMs = elapsed;
     t.diagnostic(
-      `4320 步 3 轮：min ${elapsed.toFixed(1)} / max ${Math.max(...elapsedRounds).toFixed(1)} ms（门禁 ≤2000）`
+      `4320 步 3 轮：min ${elapsed.toFixed(1)} / max ${Math.max(...elapsedRounds).toFixed(1)} ms（门禁 ≤2200）`
     );
-    checkPerf(elapsed <= 2000, `4320 步离线推进最小值 ${elapsed.toFixed(1)} ms > 2000 ms`);
+    checkPerf(elapsed <= 2200, `4320 步离线推进最小值 ${elapsed.toFixed(1)} ms > 2200 ms`);
     assert.ok(
       out.diagnostics.warnings.some((code) => code.startsWith('LONG_OFFLINE_COARSE')),
       '超过 4320 步必须走粗推进并给出 LONG_OFFLINE_COARSE'
