@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { DELTA_LIMITS, MOOD_HOME, MOOD_KEYS } from '../../lib/core/constants.mjs';
+import { DELTA_LIMITS, MOOD_HOME, MOOD_KEYS, CYCLE_CONTRIB_WEIGHTS } from '../../lib/core/constants.mjs';
 import { round6 } from '../../lib/core/models.mjs';
 import { RandomProvider } from '../../lib/core/random.mjs';
 
@@ -20,6 +20,7 @@ import {
 } from '../../lib/modules/mood/inertia.mjs';
 import { FLOATS_PER_TICK, noiseFor } from '../../lib/modules/mood/noise.mjs';
 import { moodModule, updateMood } from '../../lib/modules/mood/index.mjs';
+import { cycleTerms, CYCLE_GAIN } from '../../lib/modules/mood/contributions.mjs';
 
 import { CHARACTER_ID, MASTER_SEED } from './_random_vectors.mjs';
 
@@ -715,4 +716,173 @@ test('C2-A：null-prototype 对象（Object.create(null)）—— 被接受（is
   };
   const result = runMood({ previous: prev, inputs });
   assert.ok(result && typeof result.state === 'object');
+});
+
+// ============================================================
+// C2-B：九维贡献计算（v1.7.14 周期扩展）
+// 所有贡献权重来自 CYCLE_CONTRIB_WEIGHTS × CYCLE_GAIN。
+// 直接调 cycleTerms() 纯函数验证，绕开 runMood 的 alpha/round6/applyLimits。
+// 旧四维贡献语义完全不变（C2-A T16 已验证）。
+// ============================================================
+
+/** C2-B 辅助：构造仅指定字段非零的九维向量，其余全部 0。 */
+function makeV2Vector(overrides = {}) {
+  const v = {
+    physical_comfort: 0, energy: 0, sensitivity: 0, social_drive: 0,
+    pain_load: 0, anxiety_delta: 0, irritability_delta: 0,
+    positive_affect_delta: 0, intimacy_need_delta: 0,
+    ...overrides
+  };
+  return Object.freeze(v);
+}
+
+/** C2-B 辅助：精确计算 cycleTerms 预期输出（与实现一致，用于验证）。 */
+function expectedCycleTerms(vector, cycleSensitivity = 0.5) {
+  const w = CYCLE_CONTRIB_WEIGHTS;
+  const g = CYCLE_GAIN;
+  const out = {};
+  // 七维 mood 输出，初始化 0
+  for (const k of MOOD_KEYS) out[k] = 0;
+  // 旧四维
+  out.energy = g * vector.energy;
+  out.sensitivity = g * vector.sensitivity;
+  out.social_drive = g * vector.social_drive;
+  out.physical_comfort = g * vector.physical_comfort;
+  out.stability = -0.3 * (cycleSensitivity - 0.5);
+  // 新五维叠加
+  const pl = vector.pain_load ?? 0;
+  const anx = vector.anxiety_delta ?? 0;
+  const irr = vector.irritability_delta ?? 0;
+  const pos = vector.positive_affect_delta ?? 0;
+  const intim = vector.intimacy_need_delta ?? 0;
+  out.physical_comfort -= g * w.w_pain_pc.initial * pl;
+  out.energy -= g * w.w_pain_energy.initial * pl;
+  out.stability -= g * w.w_anx_stab.initial * anx;
+  out.sensitivity += g * w.w_anx_sens.initial * anx;
+  out.stability -= g * w.w_irr_stab.initial * irr;
+  out.sensitivity += g * w.w_irr_sens.initial * irr;
+  out.stability += g * w.w_pos_stab.initial * pos;
+  out.social_drive += g * w.w_pos_social.initial * pos;
+  out.closeness_need = g * w.w_intimacy.initial * intim;
+  return out;
+}
+
+/** C2-B 辅助：直接调 cycleTerms 纯函数获取原始贡献（未乘 alpha、未 round6）。 */
+function rawCycleContrib(phaseVector, cycleSensitivity = 0.5) {
+  return cycleTerms(phaseVector, cycleSensitivity);
+}
+
+// C2-B T1：全零九维向量 —— 输出 = cycleSensitivity 偏移，新五维全零无影响
+test('C2-B T1：全零九维 phase_vector —— cycleTerms 仅输出 cycle_sensitivity 偏移', () => {
+  const v = makeV2Vector();
+  const out = rawCycleContrib(v, 0.5);
+  // cycleSensitivity=0.5 时 stability 偏移 = -0.3*(0.5-0.5) = 0
+  assert.equal(out.stability, 0);
+  // 旧四维都是 0，新五维也都是 0 → 所有输出都是 0
+  assert.equal(out.energy, 0);
+  assert.equal(out.sensitivity, 0);
+  assert.equal(out.social_drive, 0);
+  assert.equal(out.physical_comfort, 0);
+  assert.equal(out.closeness_need, 0);
+  assert.equal(out.stress, 0, 'stress 恒为 0');
+});
+
+// C2-B T2：pain_load=0.5 单独非零 —— pc ↓ + energy ↓ 验证方向和数值
+test('C2-B T2：pain_load 单独 → physical_comfort 负向 + energy 负向', () => {
+  const v = makeV2Vector({ pain_load: 0.5 });
+  const out = rawCycleContrib(v);
+  const w = CYCLE_CONTRIB_WEIGHTS;
+  const g = CYCLE_GAIN;
+  const expected = expectedCycleTerms(v);
+  // 精确数值验证（纯函数，无 alpha）
+  assert.equal(out.physical_comfort, expected.physical_comfort);
+  assert.equal(out.energy, expected.energy);
+  // 方向
+  assert.ok(out.physical_comfort < 0, `pain↑ → pc 必须↓ (got ${out.physical_comfort})`);
+  assert.ok(out.energy < 0, `pain↑ → energy 必须↓ (got ${out.energy})`);
+});
+
+// C2-B T3：anxiety_delta=+0.3 单独 —— stability ↓ + sensitivity ↑
+test('C2-B T3：anxiety_delta 单独 → stability 负向 + sensitivity 正向', () => {
+  const v = makeV2Vector({ anxiety_delta: 0.3 });
+  const out = rawCycleContrib(v);
+  const expected = expectedCycleTerms(v);
+  assert.equal(out.stability, expected.stability);
+  assert.equal(out.sensitivity, expected.sensitivity);
+  assert.ok(out.stability < 0, `anxiety↑ → stability 必须↓`);
+  assert.ok(out.sensitivity > 0, `anxiety↑ → sensitivity 必须↑`);
+});
+
+// C2-B T4：irritability_delta=+0.3 单独 —— stability ↓ + sensitivity ↑
+test('C2-B T4：irritability_delta 单独 → stability 负向 + sensitivity 正向', () => {
+  const v = makeV2Vector({ irritability_delta: 0.3 });
+  const out = rawCycleContrib(v);
+  const expected = expectedCycleTerms(v);
+  assert.equal(out.stability, expected.stability);
+  assert.equal(out.sensitivity, expected.sensitivity);
+  assert.ok(out.stability < 0, `irr↑ → stability 必须↓`);
+  assert.ok(out.sensitivity > 0, `irr↑ → sensitivity 必须↑`);
+});
+
+// C2-B T5：positive_affect_delta=+0.3 单独 —— stability ↑ + social_drive ↑
+test('C2-B T5：positive_affect_delta 单独 → stability 正向 + social_drive 正向', () => {
+  const v = makeV2Vector({ positive_affect_delta: 0.3 });
+  const out = rawCycleContrib(v);
+  const expected = expectedCycleTerms(v);
+  assert.equal(out.stability, expected.stability);
+  assert.equal(out.social_drive, expected.social_drive);
+  assert.ok(out.stability > 0, `positive↑ → stability 必须↑`);
+  assert.ok(out.social_drive > 0, `positive↑ → social_drive 必须↑`);
+});
+
+// C2-B T6：intimacy_need_delta=+0.5 单独 —— closeness_need ↑（cycle 新增来源）
+test('C2-B T6：intimacy_need_delta 单独 → closeness_need 正向（cycle 新增渠道）', () => {
+  const v = makeV2Vector({ intimacy_need_delta: 0.5 });
+  const out = rawCycleContrib(v);
+  const expected = expectedCycleTerms(v);
+  assert.equal(out.closeness_need, expected.closeness_need);
+  assert.ok(out.closeness_need > 0, `intimacy↑ → closeness_need 必须↑`);
+  assert.equal(out.stress, 0, 'stress 恒为 0');
+  assert.equal(out.energy, 0, 'intimacy 不应影响 energy');
+});
+
+// C2-B T7：九维全非零 —— cycleTerms 与 expectedCycleTerms 逐维精确一致
+test('C2-B T7：九维全非零输入 —— cycleTerms 与 CYCLE_CONTRIB_WEIGHTS 精确一致', () => {
+  const v = makeV2Vector({
+    physical_comfort: 0.05, energy: 0.06, sensitivity: -0.02, social_drive: 0.05,
+    pain_load: 0.5, anxiety_delta: 0.3, irritability_delta: 0.2,
+    positive_affect_delta: 0.25, intimacy_need_delta: 0.4
+  });
+  const expected = expectedCycleTerms(v, 0.5);
+  const out = rawCycleContrib(v, 0.5);
+  for (const dim of MOOD_KEYS) {
+    assert.equal(out[dim], expected[dim], `${dim}: expect ${expected[dim]}, got ${out[dim]}`);
+  }
+});
+
+// C2-B T8：V1 输入无新五维键 —— cycleTerms 自动降级新五维为 0，旧四维不变
+test('C2-B T8：V1 四维输入（无新五维键）—— cycleTerms 自动降级新五维为 0，旧四维不变', () => {
+  const v1Only = { ...VALID_V1_VECTOR };
+  const out = rawCycleContrib(v1Only);
+  const expected = expectedCycleTerms(v1Only);
+  for (const dim of MOOD_KEYS) {
+    assert.equal(out[dim], expected[dim], `${dim} 应一致`);
+  }
+  // closeness_need 为 0（intimacy_need_delta 不存在，??0 降级）
+  assert.equal(out.closeness_need, 0);
+});
+
+// C2-B T9：closeness_need 纯 cycle 渠道 —— 单独验证 CYCLE_GAIN × w_intimacy × intimacy
+test('C2-B T9：closeness_need cycle 渠道 —— CYCLE_GAIN × w_intimacy.initial × intimacy 精确一致', () => {
+  const g = CYCLE_GAIN;
+  const w = CYCLE_CONTRIB_WEIGHTS;
+  const v = makeV2Vector({ intimacy_need_delta: 0.5 });
+  const out = rawCycleContrib(v);
+  const expectedCycleCloseness = g * w.w_intimacy.initial * 0.5;
+  assert.equal(out.closeness_need, expectedCycleCloseness);
+  // 其他维度不应受影响（全部为 0 或仅有 stability 的 cycleSensitivity 偏移）
+  assert.equal(out.energy, 0);
+  assert.equal(out.physical_comfort, 0);
+  assert.equal(out.sensitivity, 0);
+  assert.equal(out.social_drive, 0);
 });
