@@ -19,7 +19,11 @@
     "engineMode": "embedded",
     "engineRemoteUrl": "",
     "engineRemoteToken": "",
-    "afterResponseMode": "off"
+    "afterResponseMode": "off",
+    "cyclePainSensitivity": 1,
+    "cycleLutealSensitivity": 1,
+    "cycleMoodVariability": 1,
+    "cycleIntimacyVariability": 1
   },
   "configSchema": {
     "enabled": { "type": "boolean", "title": "启用模拟引擎", "default": true },
@@ -52,6 +56,10 @@
     "engineMode": { "type": "string", "title": "引擎模式", "default": "embedded", "enum": ["embedded", "remote"] },
     "engineRemoteUrl": { "type": "string", "title": "远程引擎 URL", "default": "", "maxLength": 200 },
     "engineRemoteToken": { "type": "string", "title": "远程引擎令牌", "default": "", "secret": true, "maxLength": 512 },
-    "afterResponseMode": { "type": "string", "title": "回复后处理模式", "default": "off", "enum": ["off", "protocol"] }
+    "afterResponseMode": { "type": "string", "title": "回复后处理模式", "default": "off", "enum": ["off", "protocol"] },
+    "cyclePainSensitivity": { "type": "number", "title": "经期疼痛敏感度", "default": 1, "minimum": 0, "maximum": 1.5 },
+    "cycleLutealSensitivity": { "type": "number", "title": "黄体期敏感度", "default": 1, "minimum": 0, "maximum": 1.5 },
+    "cycleMoodVariability": { "type": "number", "title": "情绪波动系数", "default": 1, "minimum": 0, "maximum": 1.5 },
+    "cycleIntimacyVariability": { "type": "number", "title": "亲密需求波动系数", "default": 1, "minimum": 0, "maximum": 1.5 }
   }
 }

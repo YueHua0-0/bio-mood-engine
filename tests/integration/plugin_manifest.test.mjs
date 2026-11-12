@@ -234,3 +234,112 @@ test('配置规范化：非法值回退默认并记 FASTCFG_INVALID，未知键�
   assert.deepEqual(good.warnings, []);
   assert.equal(good.settings.masterSeedHex, FIXED_SEED);
 });
+
+// ---- C2-E / E-A：四个周期 profile 设置（00 §8 规则 4、13 §4.3/§4.4） ----
+
+const PROFILE_KEYS = Object.freeze([
+  'cyclePainSensitivity',
+  'cycleLutealSensitivity',
+  'cycleMoodVariability',
+  'cycleIntimacyVariability'
+]);
+
+function countCode(warnings, code) {
+  return warnings.filter((item) => item === code).length;
+}
+
+test('E-A 设置定义：四键默认 1.0，且 SETTINGS_KEYS / plugin.json settings / configSchema 三者一致', () => {
+  for (const key of PROFILE_KEYS) {
+    assert.ok(SETTINGS_KEYS.includes(key), `${key} 必须在 SETTINGS_KEYS`);
+    assert.equal(DEFAULT_SETTINGS[key], 1, `${key} 默认值`);
+    assert.equal(manifest.settings[key], 1, `${key} plugin.json settings`);
+    assert.equal(typeof manifest.settings[key], 'number', `${key} 必须是扁平 number（P-13-08）`);
+    const schema = manifest.configSchema[key];
+    assert.equal(schema.type, 'number', `${key} schema.type`);
+    assert.equal(schema.default, 1, `${key} schema.default`);
+    assert.equal(schema.minimum, 0, `${key} schema.minimum`);
+    assert.equal(schema.maximum, 1.5, `${key} schema.maximum`);
+  }
+});
+
+test('E-A 合法边界：0 / 1.5 / 0.8 / -0 全部接受，无警告无错误', () => {
+  for (const [value, expected] of [[0, 0], [1.5, 1.5], [0.8, 0.8], [-0, 0]]) {
+    const out = normalizeConfig({ cyclePainSensitivity: value });
+    // -0 按 0 处理：数值上等价，不要求区分符号位。
+    assert.ok(out.settings.cyclePainSensitivity === expected, `${String(value)} 应为 ${expected}`);
+    assert.deepEqual(out.warnings, [], `${String(value)} 不得产生警告`);
+    assert.deepEqual(out.errors, [], `${String(value)} 不得产生错误`);
+  }
+});
+
+test('E-A 非法值：类型错误 / 非有限 / 越界分别归类，回退 1.0 且逐键记录 errors', () => {
+  const cases = [
+    ['range', -0.01],
+    ['range', 1.51],
+    ['non_finite', NaN],
+    ['non_finite', Infinity],
+    ['non_finite', -Infinity],
+    ['type', null],
+    ['type', undefined],
+    ['type', '-0.01'],
+    ['type', '1.5'],
+    ['type', true],
+    ['type', new Number(0)]
+  ];
+  for (const key of PROFILE_KEYS) {
+    for (const [reason, value] of cases) {
+      const out = normalizeConfig({ [key]: value });
+      assert.equal(out.settings[key], 1, `${key}=${String(value)} 回退默认`);
+      assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 1, `${key}=${String(value)} 警告`);
+      assert.equal(out.errors.length, 1, `${key}=${String(value)} errors 条数`);
+      assert.equal(out.errors[0].field, key);
+      assert.equal(out.errors[0].reason, reason, `${key}=${String(value)} reason`);
+    }
+  }
+});
+
+test('E-A 缺键与显式非法区分：缺键走默认且无警告，显式非法不得静默吞掉', () => {
+  const missing = normalizeConfig({});
+  for (const key of PROFILE_KEYS) assert.equal(missing.settings[key], 1);
+  assert.deepEqual(missing.warnings, []);
+
+  const explicit = normalizeConfig({ cycleLutealSensitivity: null });
+  assert.equal(explicit.settings.cycleLutealSensitivity, 1);
+  assert.equal(countCode(explicit.warnings, 'FASTCFG_INVALID'), 1);
+  assert.equal(explicit.errors[0].reason, 'type');
+});
+
+test('E-A warnings 按非法种类去重：同种多键只记一次，异种分别保留', () => {
+  const sameKind = normalizeConfig({
+    cyclePainSensitivity: 'x',
+    cycleLutealSensitivity: null,
+    cycleMoodVariability: true
+  });
+  assert.equal(countCode(sameKind.warnings, 'FASTCFG_INVALID'), 1, '同种 type 只记一次');
+  assert.equal(sameKind.errors.length, 3, 'errors 仍逐键保留明细');
+
+  const mixed = normalizeConfig({
+    cyclePainSensitivity: 'x',
+    cycleLutealSensitivity: NaN,
+    cycleMoodVariability: 2
+  });
+  assert.equal(countCode(mixed.warnings, 'FASTCFG_INVALID'), 3, 'type / non_finite / range 各一次');
+  assert.deepEqual(
+    mixed.errors.map((item) => item.reason).sort(),
+    ['non_finite', 'range', 'type']
+  );
+});
+
+test('E-A 单个非法设置不影响其他键规范化，未知键行为不变', () => {
+  const out = normalizeConfig({
+    cyclePainSensitivity: 9,
+    cycleIntimacyVariability: 1.2,
+    masterSeedHex: FIXED_SEED,
+    unknownKey: 1
+  });
+  assert.equal(out.settings.cyclePainSensitivity, 1);
+  assert.equal(out.settings.cycleIntimacyVariability, 1.2);
+  assert.equal(out.settings.masterSeedHex, FIXED_SEED);
+  assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 1);
+  assert.equal(countCode(out.warnings, 'UNKNOWN_CONFIG_KEY'), 1);
+});

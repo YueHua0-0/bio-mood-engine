@@ -99,7 +99,12 @@ export const DEFAULT_SETTINGS = Object.freeze({
   engineMode: 'embedded',
   engineRemoteUrl: '',
   engineRemoteToken: '',
-  afterResponseMode: 'off'
+  afterResponseMode: 'off',
+  // 00 §8 / 13 §4.3：profile 调制系数，扁平 number，范围 [0,1.5]，默认 1.0。
+  cyclePainSensitivity: 1,
+  cycleLutealSensitivity: 1,
+  cycleMoodVariability: 1,
+  cycleIntimacyVariability: 1
 });
 
 export const SETTINGS_KEYS = Object.freeze(Object.keys(DEFAULT_SETTINGS));
@@ -248,6 +253,15 @@ export function settingProblem(key, value) {
       return typeof value === 'string' && value.length <= 512 ? null : 'range';
     case 'afterResponseMode':
       return value === 'off' || value === 'protocol' ? null : 'enum';
+    case 'cyclePainSensitivity':
+    case 'cycleLutealSensitivity':
+    case 'cycleMoodVariability':
+    case 'cycleIntimacyVariability': {
+      // 00 §8 规则 4：类型错误 / 非有限数值 / 超出 [0,1.5] 是三种不同非法种类。
+      if (typeof value !== 'number') return 'type';
+      if (!Number.isFinite(value)) return 'non_finite';
+      return value >= 0 && value <= 1.5 ? null : 'range';
+    }
     default:
       return 'unknown_key';
   }
@@ -358,6 +372,7 @@ function pushUnique(list, code) {
 export function normalizeConfig(raw) {
   const warnings = [];
   const errors = [];
+  const invalidKinds = new Set();
   const input = isPlainObject(raw) ? raw : {};
   const settings = {
     ...DEFAULT_SETTINGS,
@@ -374,7 +389,12 @@ export function normalizeConfig(raw) {
     const value = input[key];
     const problem = settingProblem(key, value);
     if (problem) {
-      pushUnique(warnings, 'FASTCFG_INVALID');
+      // 00 §8 规则 4：warnings 按非法值种类去重（type / non_finite / range 各至多一次），
+      // errors 仍逐键保留 field + reason 明细，不因去重丢信息。
+      if (!invalidKinds.has(problem)) {
+        invalidKinds.add(problem);
+        warnings.push('FASTCFG_INVALID');
+      }
       const multiplePrimary = key === 'primaryChatId' && primaryIdsOf(value).length > 1;
       errors.push({
         code: 'FASTCFG_INVALID',
