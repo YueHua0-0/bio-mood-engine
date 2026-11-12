@@ -387,3 +387,37 @@ test('E-A 混合：既有设置按码去重与 profile 按种类去重互不干�
   assert.equal(out.settings.cycleLutealSensitivity, 1);
   assert.equal(out.settings.cycleMoodVariability, 1);
 });
+
+test('E-A 混合顺序无关：profile 在前、既有设置在后仍为 4 条', () => {
+  const out = normalizeConfig({
+    cyclePainSensitivity: 'x',      // profile type
+    cycleLutealSensitivity: NaN,    // profile non_finite
+    cycleMoodVariability: 2,        // profile range
+    enabled: 'yes'                  // 既有 type
+  });
+  assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 4, '既有设置的 1 条不得被 profile 抑制');
+  assert.equal(out.errors.length, 4, 'errors 逐键保留');
+  assert.equal(out.errors.filter((item) => item.field === 'enabled').length, 1);
+});
+
+test('E-A 混合交错顺序：两类去重互不抑制', () => {
+  const out = normalizeConfig({
+    cyclePainSensitivity: 'x',      // profile type
+    enabled: 'yes',                 // 既有 type
+    cycleLutealSensitivity: NaN,    // profile non_finite
+    behaviorContextMaxChars: 9999,  // 既有 range
+    cycleMoodVariability: 2         // profile range
+  });
+  assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 4);
+  assert.equal(out.errors.length, 5);
+  assert.deepEqual(
+    out.errors.map((item) => `${item.field}:${item.reason}`).sort(),
+    [
+      'behaviorContextMaxChars:range',
+      'cycleLutealSensitivity:non_finite',
+      'cycleMoodVariability:range',
+      'cyclePainSensitivity:type',
+      'enabled:type'
+    ]
+  );
+});

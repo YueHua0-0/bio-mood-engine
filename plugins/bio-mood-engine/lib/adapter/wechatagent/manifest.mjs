@@ -380,6 +380,8 @@ export function normalizeConfig(raw) {
   const warnings = [];
   const errors = [];
   const invalidKinds = new Set();
+  // 既有设置（非 profile）仍按 warning code 全局去重一次，与 profile 的种类去重互不抑制。
+  let legacyInvalidSeen = false;
   const input = isPlainObject(raw) ? raw : {};
   const settings = {
     ...DEFAULT_SETTINGS,
@@ -403,8 +405,9 @@ export function normalizeConfig(raw) {
           invalidKinds.add(problem);
           warnings.push('FASTCFG_INVALID');
         }
-      } else {
-        pushUnique(warnings, 'FASTCFG_INVALID');
+      } else if (!legacyInvalidSeen) {
+        legacyInvalidSeen = true;
+        warnings.push('FASTCFG_INVALID');
       }
       const multiplePrimary = key === 'primaryChatId' && primaryIdsOf(value).length > 1;
       errors.push({
