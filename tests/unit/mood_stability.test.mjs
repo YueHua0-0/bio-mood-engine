@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { MOOD_HOME, MOOD_KEYS } from '../../lib/core/constants.mjs';
+import { MOOD_HOME, MOOD_KEYS, MOOD_MODEL_VERSION } from '../../lib/core/constants.mjs';
 import { RandomProvider } from '../../lib/core/random.mjs';
 import { updateMood } from '../../lib/modules/mood/index.mjs';
 
@@ -30,7 +30,7 @@ const NEUTRAL_REGULATION = Object.freeze({
 function makeMood(overrides = {}) {
   const out = {};
   for (const key of MOOD_KEYS) out[key] = MOOD_HOME[key];
-  out.model_version = 1;
+  out.model_version = MOOD_MODEL_VERSION;
   return { ...out, ...overrides };
 }
 

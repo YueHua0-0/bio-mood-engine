@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { DELTA_LIMITS, MOOD_HOME, MOOD_KEYS, CYCLE_CONTRIB_WEIGHTS } from '../../lib/core/constants.mjs';
+import { DEFAULT_STATE, DELTA_LIMITS, MOOD_HOME, MOOD_KEYS, MOOD_MODEL_VERSION, CYCLE_CONTRIB_WEIGHTS } from '../../lib/core/constants.mjs';
 import { round6 } from '../../lib/core/models.mjs';
 import { RandomProvider } from '../../lib/core/random.mjs';
 
@@ -21,6 +21,8 @@ import {
 import { FLOATS_PER_TICK, noiseFor } from '../../lib/modules/mood/noise.mjs';
 import { moodModule, updateMood } from '../../lib/modules/mood/index.mjs';
 import { cycleTerms, CYCLE_GAIN } from '../../lib/modules/mood/contributions.mjs';
+
+import { loadValidState } from '../helpers/state.mjs';
 
 import { CHARACTER_ID, MASTER_SEED } from './_random_vectors.mjs';
 
@@ -44,7 +46,7 @@ const NEUTRAL_REGULATION = Object.freeze({
 function makeMood(overrides = {}) {
   const out = {};
   for (const key of MOOD_KEYS) out[key] = MOOD_HOME[key];
-  out.model_version = 1;
+  out.model_version = MOOD_MODEL_VERSION;
   return { ...out, ...overrides };
 }
 
@@ -621,7 +623,7 @@ test('C2-A T15：边界值 ±1 / 0 / MIN_VALUE / -0 均被接受', () => {
   const result = runMood({ previous: prev, inputs, rng });
   // 只需验证合法输入被接受，完整 mood 更新成功
   assert.ok(result && typeof result.state === 'object');
-  assert.equal(result.state.model_version, 1);
+  assert.equal(result.state.model_version, MOOD_MODEL_VERSION);
 });
 
 // T16：合法九维调用 cycleTerms，旧四维贡献与纯四维输入一致
@@ -668,8 +670,8 @@ test('C2-A T17：合法九维输入触发完整 mood 更新', () => {
   for (const key of Object.keys(MOOD_HOME)) {
     assert.ok(typeof result.state[key] === 'number', `mood.${key} 必须是 number`);
   }
-  // model_version 应保留 1（C2-A 不升级版本）
-  assert.equal(result.state.model_version, 1);
+  // model_version 由 C2-C 统一为 MOOD_MODEL_VERSION（2）
+  assert.equal(result.state.model_version, MOOD_MODEL_VERSION);
 });
 
 // T19：非法输入失败时 mood 状态未被部分更新（原子性）
@@ -916,4 +918,66 @@ test('C2-B CT1：CYCLE_CONTRIB_WEIGHTS 与冻结契约一致（Contract Test）'
   }
   // 额外：契约规定 CYCLE_GAIN = 0.6
   assert.equal(CYCLE_GAIN, 0.6, 'CYCLE_GAIN 冻结值 0.6，实际被篡改？');
+});
+
+// ---------------------------------------------------------------------------
+// C2-C：版本迁移与诊断
+// ---------------------------------------------------------------------------
+
+// C2-C T1：state.model_version / diagnostics.model_version 统一取自 MOOD_MODEL_VERSION
+test('C2-C T1：state 与 diagnostics 的 model_version 统一为 MOOD_MODEL_VERSION', () => {
+  const out = runMood();
+  assert.equal(MOOD_MODEL_VERSION, 2, 'MOOD_MODEL_VERSION 冻结值 2');
+  assert.equal(out.state.model_version, MOOD_MODEL_VERSION);
+  assert.equal(out.diagnostics.model_version, MOOD_MODEL_VERSION);
+  assert.equal(out.diagnostics.module, 'mood');
+  // 与 DEFAULT_STATE 内置初始态保持一致（单一事实源）
+  assert.equal(DEFAULT_STATE.mood.model_version, MOOD_MODEL_VERSION);
+});
+
+// C2-C T2：真实 fixture 的旧状态（model_version=1）经 updateMood 完整处理路径 → 迁移为 2
+test('C2-C T2：fixture 旧状态（model_version=1）经 updateMood 后版本迁移为 2 且七维无丢失', () => {
+  const previous = loadValidState().mood; // tests/fixtures/state.valid.json：mood.model_version = 1
+  assert.equal(previous.model_version, 1, 'fixture 必须保持 v1，作为迁移输入基线');
+
+  const out = runMood({ previous });
+  assert.equal(out.state.model_version, 2);
+  assert.equal(out.diagnostics.model_version, 2);
+
+  // 完整状态路径：输出键集恰为七维 + model_version，无字段丢失、无多余字段
+  assert.deepEqual(
+    Object.keys(out.state).sort(),
+    [...MOOD_KEYS, 'model_version'].sort()
+  );
+  for (const key of MOOD_KEYS) {
+    assert.ok(Number.isFinite(out.state[key]), `${key} 必须为有限数`);
+    assert.ok(out.state[key] >= 0 && out.state[key] <= 1, `${key} 必须落在 [0,1]`);
+    assert.equal(Object.is(out.state[key], -0), false, `${key} 不得为 -0`);
+  }
+  // 八来源贡献完整，迁移过程未影响贡献分解
+  assert.deepEqual(
+    Object.keys(out.contributions).sort(),
+    MOOD_KEYS.map((key) => `mood.${key}`).sort()
+  );
+});
+
+// C2-C T3：model_version 不参与计算——仅版本号不同时，状态与随机流消耗完全一致
+test('C2-C T3：model_version 不参与噪声/惯性计算（previous=1 与 2 输出一致）', () => {
+  const inputs = makeInputs();
+  const streamOld = makeStream();
+  const streamCur = makeStream();
+  const beforeOld = streamOld.counter;
+  const beforeCur = streamCur.counter;
+  const outOld = runMood({ previous: makeMood({ model_version: 1 }), inputs, rng: streamOld });
+  const outCur = runMood({ previous: makeMood({ model_version: 2 }), inputs, rng: streamCur });
+
+  assert.equal(streamOld.counter - beforeOld, streamCur.counter - beforeCur);
+  assert.deepEqual(outOld.contributions, outCur.contributions);
+  assert.deepEqual(outOld.reason_codes, outCur.reason_codes);
+  for (const key of MOOD_KEYS) {
+    assert.equal(outOld.state[key], outCur.state[key], `${key} 不应受 model_version 影响`);
+  }
+  for (const key of MOOD_KEYS) {
+    assert.ok(outOld.state[key] >= 0 && outOld.state[key] <= 1, key);
+  }
 });
