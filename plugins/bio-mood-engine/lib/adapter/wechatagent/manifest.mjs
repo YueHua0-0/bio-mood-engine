@@ -109,6 +109,13 @@ export const DEFAULT_SETTINGS = Object.freeze({
 
 export const SETTINGS_KEYS = Object.freeze(Object.keys(DEFAULT_SETTINGS));
 const SETTINGS_KEY_SET = new Set(SETTINGS_KEYS);
+/** 00 §8 规则 4：只有四个 profile 系数按非法种类去重，其余设置沿用按码去重。 */
+const PROFILE_SETTING_KEYS = new Set([
+  'cyclePainSensitivity',
+  'cycleLutealSensitivity',
+  'cycleMoodVariability',
+  'cycleIntimacyVariability'
+]);
 
 /**
  * 宿主受限子集（WeChatAgent-plugin-api-v2.md 第 80 行）：关键词与类型都不许越界，
@@ -389,11 +396,15 @@ export function normalizeConfig(raw) {
     const value = input[key];
     const problem = settingProblem(key, value);
     if (problem) {
-      // 00 §8 规则 4：warnings 按非法值种类去重（type / non_finite / range 各至多一次），
-      // errors 仍逐键保留 field + reason 明细，不因去重丢信息。
-      if (!invalidKinds.has(problem)) {
-        invalidKinds.add(problem);
-        warnings.push('FASTCFG_INVALID');
+      // 00 §8 规则 4：profile 系数按非法值种类去重（type / non_finite / range 各至多一次）；
+      // 其他既有设置保持原行为（按 warning code 去重）。errors 仍逐键保留明细。
+      if (PROFILE_SETTING_KEYS.has(key)) {
+        if (!invalidKinds.has(problem)) {
+          invalidKinds.add(problem);
+          warnings.push('FASTCFG_INVALID');
+        }
+      } else {
+        pushUnique(warnings, 'FASTCFG_INVALID');
       }
       const multiplePrimary = key === 'primaryChatId' && primaryIdsOf(value).length > 1;
       errors.push({
@@ -414,7 +425,8 @@ export function normalizeConfig(raw) {
       settings.primaryChatId = Array.isArray(value) ? value.join(',') : value;
       settings.primaryChatIds = primaryIdsOf(value);
     } else {
-      settings[key] = value;
+      // 规范化负零：-0 与 0 数值等价，但统一写正 0 避免符号位进入后续计算。
+      settings[key] = typeof value === 'number' && Object.is(value, -0) ? 0 : value;
     }
   }
 

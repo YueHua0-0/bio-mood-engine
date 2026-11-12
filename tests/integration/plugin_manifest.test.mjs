@@ -270,6 +270,8 @@ test('E-A 合法边界：0 / 1.5 / 0.8 / -0 全部接受，无警告无错误', 
     assert.deepEqual(out.warnings, [], `${String(value)} 不得产生警告`);
     assert.deepEqual(out.errors, [], `${String(value)} 不得产生错误`);
   }
+  const negZero = normalizeConfig({ cyclePainSensitivity: -0 });
+  assert.equal(Object.is(negZero.settings.cyclePainSensitivity, 0), true, '-0 必须规范为正 0');
 });
 
 test('E-A 非法值：类型错误 / 非有限 / 越界分别归类，回退 1.0 且逐键记录 errors', () => {
@@ -342,4 +344,46 @@ test('E-A 单个非法设置不影响其他键规范化，未知键行为不变'
   assert.equal(out.settings.masterSeedHex, FIXED_SEED);
   assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 1);
   assert.equal(countCode(out.warnings, 'UNKNOWN_CONFIG_KEY'), 1);
+});
+
+test('E-A 回归：既有设置的 FASTCFG_INVALID 仍按码全局去重一次', () => {
+  const out = normalizeConfig({
+    enabled: 'yes',                 // type
+    behaviorContextMaxChars: 9999,  // range
+    masterSeedHex: 'invalid'        // pattern
+  });
+  assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 1, '既有设置不得因种类不同而重复');
+  assert.equal(out.errors.length, 3, 'errors 仍逐键保留');
+  assert.deepEqual(
+    out.errors.map((item) => item.reason).sort(),
+    ['pattern', 'range', 'type']
+  );
+});
+
+test('E-A 混合：既有设置按码去重与 profile 按种类去重互不干扰', () => {
+  // 输入顺序固定为「既有键在前、profile 键在后」，与宿主配置对象的自然顺序一致。
+  const out = normalizeConfig({
+    enabled: 'yes',                 // 既有 type
+    behaviorContextMaxChars: 9999,  // 既有 range
+    cyclePainSensitivity: 'x',      // profile type
+    cycleLutealSensitivity: NaN,    // profile non_finite
+    cycleMoodVariability: 2         // profile range
+  });
+  // 1 次来自既有设置（按码）+ 3 次来自 profile（type / non_finite / range 各一次）。
+  assert.equal(countCode(out.warnings, 'FASTCFG_INVALID'), 4);
+  assert.equal(out.errors.length, 5, 'errors 逐键保留，不因去重丢失明细');
+  assert.deepEqual(
+    out.errors.map((item) => `${item.field}:${item.reason}`).sort(),
+    [
+      'behaviorContextMaxChars:range',
+      'cycleLutealSensitivity:non_finite',
+      'cycleMoodVariability:range',
+      'cyclePainSensitivity:type',
+      'enabled:type'
+    ]
+  );
+  assert.equal(out.settings.enabled, DEFAULT_SETTINGS.enabled);
+  assert.equal(out.settings.cyclePainSensitivity, 1);
+  assert.equal(out.settings.cycleLutealSensitivity, 1);
+  assert.equal(out.settings.cycleMoodVariability, 1);
 });
