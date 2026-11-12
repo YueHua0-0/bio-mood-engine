@@ -1,0 +1,18 @@
+chore: v1.7.14 契约冻结文档收口（线上 AI 最终方案对齐）
+
+- 00 文件头升 v1.7.14 + 完整变更记录（10 条）
+- 05：删 lutealWeight() 固定映射，改用 phaseWeights(progress, cycleLengthDays) 唯一接口
+- 05：补完整 crossfade profile 调制公式（按实际 w_l 连续调制 anxiety_delta/irritability_delta）
+- 09：补 §6.4 周期向量严格校验 10 种边界表（null/空对象/非对象/缺/多/类型/NaN/Inf/越界 → MODULE_FAILED；只有不存在/undefined 才降级）
+- 13：settings 表加四个扁平键（cyclePainSensitivity/LutealSensitivity/MoodVariability/IntimacyVariability）+ 配置传递链路
+- 14：T19 interface_version 断言更新为 2；新增 M-C06a/M-C06b/M-C14/M-C15/M-C17/M-C18 测试条目
+- ChatGPT 两个旧方案文件加"历史稿 · 不具实施效力"标注
+- 线上 AI 最终方案（docs/ChatGPT/Bio-Mood-Engine v1.7.14最终契约裁决与桌面Agent 文档修订移交.md）落盘
+
+跨文档一致性审查：00/05/09/13/14/12 六份正式契约已同步，luteal_like 矩阵 pain_load=0.35 / anxiety_delta=+0.12 / irritability_delta=+0.18 与 05 一致。
+
+schema_version 保持 1（本轮不改变持久化 schema 主版本）。
+regulation.model_version 保持 1。
+08/10/HTTP 入参未改。
+代码 lib/ 未变（C3→C1→C2→C4→C6 为后续阶段）。
+490/490 test PASS，check-docs PASS。

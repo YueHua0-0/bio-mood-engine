@@ -88,6 +88,25 @@
 | `engineRemoteUrl` | string | `""` | `remote` 时必填，`https://` 开头、≤200 字符；未配置且 `engineMode=remote` 时工具返回 `DEGRADED` |
 | `engineRemoteToken` | string | `""` | `secret:true`；仅 `engineMode=remote` 时使用；运行时优先读宿主密钥或 `process.env.BM_REMOTE_TOKEN`，settings 值仅作 fallback；写入 `cfg` 时脱敏为 `***`，禁止进入日志/工具返回 |
 | `afterResponseMode` | string | `off` | `off` / `protocol`；见 §5.6 |
+| `cyclePainSensitivity` | number | `1.0` | 范围 `[0, 1.5]`；05 `phase_impact` 的 `pain_load` 调制系数（乘 `pain_sensitivity`）。超出范围回退 1.0 并去重记 `FASTCFG_INVALID`；非法值（NaN/非有限）同样回退 |
+| `cycleLutealSensitivity` | number | `1.0` | 范围 `[0, 1.5]`；05 中 crossfade 对黄体阶段 `anxiety_delta` / `irritability_delta` 分量的连续调制系数（乘 `w_l × luteal_sensitivity`）；不得对阶段枚举做二值开关 |
+| `cycleMoodVariability` | number | `1.0` | 范围 `[0, 1.5]`；05 中对 `anxiety_delta` / `irritability_delta` / `positive_affect_delta` 整体的调制系数 |
+| `cycleIntimacyVariability` | number | `1.0` | 范围 `[0, 1.5]`；05 中对 `intimacy_need_delta` 的调制系数 |
+
+**配置传递链路**（线上 AI §5.3）：
+
+```text
+settingsOfRuntime()
+  → normalizeConfig()        // 类型/有限性/[0,1.5] 范围校验；非法回退 1.0 + FASTCFG_INVALID
+  → engineConfigOf(state)    // 组装为 config.cycle.profile = { pain_sensitivity, luteal_sensitivity, mood_variability, intimacy_variability }
+  → runAdvance(state, event, now, pending, settings)
+  → advance({ config })
+  → updateCycle({ config })
+```
+
+每次运行读取最新 `ctx.config()`，不得只在初始化时读取。05 公式**不得**通过 `clamp(profile.x, 0, 1.5)` 静默吞掉非法值；若绕过配置层进入引擎，按模块输入契约失败（线上 AI §5.2）。
+
+四个设置是**新增键**，不替换或重命名任何现有 settings 键；必须同步更新 `plugin.json` 的 `configSchema` 扁平映射（不得套 `{type:"object", properties:{...}}` 外壳，P-13-08）。
 
 `masterSeedHex` 只在初始化与重置种子时读取；运行时一律以 `state.random.master_seed_hex` 为准，`settings.masterSeedHex` 在首次运行后保持为空属正常；不得写入日志、工具返回或 `behavior_context`；日志只允许 `master_seed_id`（`sha256(seed)` 前 8 位，00 §10.2）。
 
