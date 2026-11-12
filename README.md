@@ -212,7 +212,6 @@ bio-mood-engine/
 | [16 — Simulation & Replay](./docs/16-仿真回放与可视化.md) | Scenario format, A1–A10 checks, M01–M16 gates |
 | [Open Issue Ledger](./docs/冲突报告与问题台账_未裁决.md) | Current handoff: pending rulings and ruled/implemented items not yet verified |
 | [Verified Issue Archive](./docs/冲突报告与问题台账_已验证.md) | Closed history: verified and rejected items, rulings, and evidence |
-| [UI Theme Spec](./.trae/documents/明日方舟_罗德岛_UI设计主题规范.md) | Rhode-Island-inspired dark industrial UI spec |
 | [CHANGELOG](./CHANGELOG.md) | Version history |
 
 ---
@@ -255,6 +254,5 @@ MIT — see [LICENSE](./LICENSE).
 - This project is an original design for a **fictional character simulation**
   and is not affiliated with any real product, game, or organisation.
 - The dark industrial UI style in the state page draws aesthetic inspiration
-  from the *Rhodes Island* interface language described in
-  [`.trae/documents/明日方舟_罗德岛_UI设计主题规范.md`](./.trae/documents/明日方舟_罗德岛_UI设计主题规范.md)
-  — this is an internal design reference, not an official asset reproduction.
+  from the *Rhodes Island* interface language — this is an original design,
+  not an official asset reproduction.
