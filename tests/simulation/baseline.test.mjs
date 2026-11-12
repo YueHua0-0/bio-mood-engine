@@ -445,7 +445,7 @@ test('T17 稳定性代理：同一确定性场景连续 15 轮指纹一致，批
   // 单次 168 步只有几十毫秒，逐次计时会被 JIT/GC 噪声主导；改为每轮 5 次作为
   // 一个计时批次，执行 15 轮（共 75 次）并逐次比对指纹。
   // 15 轮的样本量足够让 GC 尖峰（Node 20 单次暂停 ~20-60ms）被激进去极值排掉，
-  // 同时保留中间 7 批用于 ratio 计算。Node 22/24 GC 暂停更短，波动仍远低于阈值。
+  // 同时保留中间 6 批用于 ratio 计算。Node 22/24 GC 暂停更短，波动仍远低于阈值。
   const fingerprint = stateFingerprint(simulate({ steps: 168 }).state);
   const batches = [];
   for (let round = 0; round < 15; round += 1) {
