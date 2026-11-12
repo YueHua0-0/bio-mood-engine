@@ -1,0 +1,26 @@
+feat: C1 05 周期模块九维 phase_impact + profile crossfade 调制 + ChatGPT .gitignore
+
+核心行为变更：
+- phase.mjs 重写：删旧四维 PHASE_VECTORS 表和旧 blend()/copyVector()/clamp1() 等 dead code
+- phaseInfluence() 新公式：先九维 crossfade 混合（按 phaseWeights 四阶段权重），再按 profile 调制
+  * pain_load × pain_sensitivity（所有阶段）
+  * anxiety_delta / irritability_delta 整体 × mood_variability + 黄体 crossfade 分量 × luteal_sensitivity
+  * positive_affect_delta × mood_variability
+  * intimacy_need_delta × intimacy_variability
+  * 旧四维直接混合不乘任何 profile（D2 裁决）
+- phaseWeights(progress, cycleLengthDays) 唯一接口，window = 0.5/L0
+- resolveProfile() 支持两种形状：{cycle:{profile:{...}}} 或直接 profile 对象
+- profile 非法值不在此处 clamp（由配置层 13 §4.4 回退默认 1.0）
+- phase_detail.phase_progress 保持 [0,1) 不变
+- phaseInfluence 输出九维，新五维 pain_load/anxiety_delta/irritability_delta/positive_affect_delta/intimacy_need_delta
+
+测试升级：
+- cycle_phase.test.mjs 全重写：阶段中心断言改九维值、crossfade 窗口断言改九维混合、MAX_DELTAS 逐字段阈值覆盖 pain_load 0.65 / anxiety 0.35 等；新增 2 个 profile 隔离断言（pain_sensitivity 只影响 pain_load，w_l=0 时 luteal_sensitivity 无效应）
+- cycle_advance.test.mjs C13 补充阈值 0.15 → 逐字段 RAW_MAX（pain_load 0.65 等）
+
+.gitignore 新增 docs/ChatGPT/（本地保留但 GitHub 删除，线上 AI 内部参考稿）
+git rm --cached docs/ChatGPT 三文件
+
+492/492 test PASS（多 2 个 profile 隔离测试），check-docs PASS，重打包 V15 PASS。
+regulation.model_version 保持 1；08/10/HTTP 不动。
+C2（09 九维消费）为下阶段。

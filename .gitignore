@@ -37,6 +37,7 @@ $RECYCLE.BIN/
 # 内部设计文档 / 本地验收清单（含个人机器路径与时间戳，不应进入公开仓库）
 docs/_source/
 docs/cloude/
+docs/ChatGPT/
 acceptance/*.md
 design/
 

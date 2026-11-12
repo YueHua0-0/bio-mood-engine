@@ -354,7 +354,12 @@ test('C12c：一次推进 10 年 → 最多 64 次逐周期采样，不超时', 
   assertCycleState(out);
 });
 
-test('C13 补充：原始逐日差 ≤0.15，经 09 的 0.6 增益与 0.06 裁剪后单步 ≤0.06', () => {
+test('C13 补充：原始逐日差（九维 phase_impact）≤ 阶段最大差 + 余量', () => {
+  const RAW_MAX = {
+    physical_comfort: 0.15, energy: 0.15, sensitivity: 0.15, social_drive: 0.15,
+    pain_load: 0.65, anxiety_delta: 0.35, irritability_delta: 0.40,
+    positive_affect_delta: 0.50, intimacy_need_delta: 0.55
+  };
   let previous = null;
   for (let day = 0; day <= Math.ceil(2 * L0); day += 1) {
     const p = day / L0 % 1;
@@ -362,9 +367,7 @@ test('C13 补充：原始逐日差 ≤0.15，经 09 的 0.6 增益与 0.06 裁�
     if (previous) {
       for (const key of Object.keys(vector)) {
         const rawDelta = Math.abs(vector[key] - previous[key]);
-        assert.ok(rawDelta <= 0.15 + 1e-9, `day ${day} ${key} 原始差 ${rawDelta}`);
-        const gained = Math.min(0.06, Math.max(-0.06, 0.6 * (vector[key] - previous[key])));
-        assert.ok(Math.abs(gained) <= 0.06, `day ${day} ${key} 单步 ${gained}`);
+        assert.ok(rawDelta <= RAW_MAX[key] + 1e-9, `day ${day} ${key} 原始差 ${rawDelta}`);
       }
     }
     previous = vector;
