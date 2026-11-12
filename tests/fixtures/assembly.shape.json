@@ -57,7 +57,7 @@
       "nested": [
         {
           "path": "mood",
-          "keys": ["energy", "stability", "sensitivity", "social_drive", "closeness_need"]
+          "keys": ["energy", "stability", "sensitivity", "social_drive", "closeness_need", "physical_comfort"]
         },
         { "path": "sleep", "keys": ["state", "sleepiness", "sleep_debt"] },
         { "path": "stress", "keys": ["level"] }

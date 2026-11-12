@@ -119,6 +119,8 @@
 
 实现：`lib/api/validate.mjs` 的 `EVENT_KEYS` / `TICK_KEYS` / `ADMIN_KEYS` 三个集合 + `collectUnknown()`；未列入白名单的字段一律拒绝，不做静默忽略。调用方若需要统一的公共字段，应只发 `events`，或先收敛到本文档再改代码。
 
+**cycle profile 配置（D2 裁决）**：HTTP 本轮**固定默认 1.0**，所有四个 `cycle.profile` 设置在服务端硬编码默认值，不接受请求体入参、不从环境变量或其他配置源读取。四个设置的完整语义、范围与非法值处理见 00 §8 和 05 §5.3.2。如需调整 profile，必须通过插件设置（13 §4.4）完成，不新增 HTTP 配置接口。
+
 **事件时间钳制（P-02-02）**：`POST /v1/events` 在 schema 校验通过后、幂等判定与推进之前，若 `occurred_at > received_at + 300000 ms`，令 `occurred_at = received_at` 并向 `data.diagnostics.warnings` 追加 `FUTURE_OCCURRED_AT`；`evlog.occurred_at` 与 `runAdvance` 的推进基准都用钳制后的值。恰好 `+5 min` 不钳制（闭区间）。`effectiveNow()` 只负责推进基准不回退，不处理事件时间。验收见 A21。
 
 ### 5.3 限流

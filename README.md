@@ -106,7 +106,7 @@ Local **unpublished candidate** package (0.1.4):
 - **Numeric range:** every persisted value is a `[0, 1]` float; `0–100`
   exists only for presentation.
 
-### 3.3 Known limitations (ledger items tracked in `docs/冲突报告与问题台账.md`)
+### 3.3 Known limitations (open items tracked in `docs/冲突报告与问题台账_未裁决.md`)
 
 The multi-primary design has been withdrawn under **P-13-20, ruling A**: v1 has
 one authoritative writer and never shares state across chats. **P-15-08 remains
@@ -197,7 +197,8 @@ bio-mood-engine/
 | [14 — Test Baseline](./docs/14-测试基线与长期仿真.md) | Test layers and case IDs |
 | [15 — Integration & Release](./docs/15-集成联调与发布.md) | E01–E08, rollback, operations, acceptance |
 | [16 — Simulation & Replay](./docs/16-仿真回放与可视化.md) | Scenario format, A1–A10 checks, M01–M16 gates |
-| [Issue Ledger](./docs/冲突报告与问题台账.md) | Single source of truth: issues, rulings, evidence |
+| [Open Issue Ledger](./docs/冲突报告与问题台账_未裁决.md) | Current handoff: pending rulings and ruled/implemented items not yet verified |
+| [Verified Issue Archive](./docs/冲突报告与问题台账_已验证.md) | Closed history: verified and rejected items, rulings, and evidence |
 | [UI Theme Spec](./.trae/documents/明日方舟_罗德岛_UI设计主题规范.md) | Rhode-Island-inspired dark industrial UI spec |
 | [CHANGELOG](./CHANGELOG.md) | Version history |
 

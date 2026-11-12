@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DOCS = join(ROOT, 'docs');
-const LEDGER = join(DOCS, '冲突报告与问题台账.md');
+const LEDGER = join(DOCS, '冲突报告与问题台账_已验证.md');
 
 /** 允许可选的 plugins/bio-mood-engine/ 前缀，避免把插件内路径误判为仓库根路径。 */
 const PATH_RE = /\b(?:(?:plugins\/bio-mood-engine\/)?(?:lib|tests|tools|docs)\/[A-Za-z0-9_\-./{}*]+\.(?:mjs|json|md))/g;
