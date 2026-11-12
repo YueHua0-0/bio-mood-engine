@@ -416,3 +416,242 @@ test('P13-02 补充：主聊天/未绑定配置不伪造 primaryChatId', async (
   assert.ok(tick.details.warnings.includes('NON_PRIMARY_READONLY'));
   assert.deepEqual(h.storage.keys(), []);
 });
+
+/* ---------------------------------- E-B ---------------------------------- */
+/*
+ * 验证扁平设置 cyclePainSensitivity / cycleLutealSensitivity / cycleMoodVariability /
+ * cycleIntimacyVariability → config.cycle.profile 的运行时透传。
+ *
+ * 口径（二期审查要求）：
+ * - 只观察 `state.mood`：九维 `phase_vector` 不进入持久化 state，不能拿 `state.cycle` 证明 profile 生效。
+ * - 方向来自 phase.mjs 的实际调制路径与冻结映射，不假设四个参数都推动同一个维度。
+ *   pain_sensitivity → pain_load（仅映射 physical_comfort / energy）；
+ *   luteal_sensitivity → 黄体分量 × 焦虑/易怒增量；
+ *   mood_variability → 焦虑/易怒/正性情感整体；
+ *   intimacy_variability → intimacy_need_delta。
+ * - 固定种子 + 12h 步长 × 56 步（672h = 28 天），覆盖四个周期相位（含 luteal_like）。
+ */
+
+const EB_PROFILE_KEYS = Object.freeze([
+  'cyclePainSensitivity',
+  'cycleLutealSensitivity',
+  'cycleMoodVariability',
+  'cycleIntimacyVariability'
+]);
+const EB_STEP_HOURS = 12;
+const EB_TICKS = 56;
+
+function ebSequenceKey(overrides) {
+  return EB_PROFILE_KEYS.map(
+    (key) => `${key}=${typeof overrides[key]}:${String(overrides[key])}`
+  ).join('|');
+}
+
+const EB_SEQUENCE_CACHE = new Map();
+
+/** 确定性执行：同一组设置整文件只跑一次。 */
+function profileSequence(overrides = {}) {
+  const key = ebSequenceKey(overrides);
+  if (!EB_SEQUENCE_CACHE.has(key)) {
+    EB_SEQUENCE_CACHE.set(key, executeProfileSequence(overrides));
+  }
+  return EB_SEQUENCE_CACHE.get(key);
+}
+
+async function executeProfileSequence(overrides) {
+  const h = makeCtx({ config: overrides });
+  const { tools } = install(h.ctx);
+  const first = await tools.observe(eventParams());
+  assert.equal(first.ok, true, 'observe 必须成功');
+  const state = h.storage.json('state');
+  const states = [state];
+  const phases = [state.cycle.phase];
+  for (let step = 1; step <= EB_TICKS; step += 1) {
+    const now = new Date(Date.parse(T0) + step * EB_STEP_HOURS * 3600 * 1000).toISOString();
+    const tick = await tools.tick({ now });
+    assert.equal(tick.ok, true, `tick ${step} 必须成功，实际 ${tick.code ?? 'unknown'}`);
+    const next = h.storage.json('state');
+    states.push(next);
+    phases.push(next.cycle.phase);
+  }
+  return { h, tools, states, phases };
+}
+
+/** 按维度求差：`to - from`。 */
+function moodDiff(from, to) {
+  const diff = {};
+  for (const dim of Object.keys(from.mood)) diff[dim] = to.mood[dim] - from.mood[dim];
+  return diff;
+}
+
+function assertDirectionalDiff(diff, { targets, others, targetFloor }, label) {
+  for (const [dim, sign] of Object.entries(targets)) {
+    assert.ok(
+      diff[dim] * sign > targetFloor,
+      `${label}：${dim} 预期${sign > 0 ? '上升' : '下降'}超过 ${targetFloor}，实际 Δ=${diff[dim]}`
+    );
+  }
+  for (const dim of others) {
+    assert.ok(
+      Math.abs(diff[dim]) < 0.01,
+      `${label}：非目标维 ${dim} 应保持稳定（|Δ| < 0.01），实际 Δ=${diff[dim]}`
+    );
+  }
+}
+
+const EB2_CASES = Object.freeze([
+  {
+    key: 'cyclePainSensitivity',
+    // pain_load × pain_sensitivity；冻结映射只触及 physical_comfort / energy。
+    targets: { physical_comfort: -1, energy: -1 },
+    others: ['stability', 'sensitivity', 'social_drive', 'closeness_need', 'stress'],
+    targetFloor: 0.005
+  },
+  {
+    key: 'cycleLutealSensitivity',
+    // 黄体分量 × luteal_sensitivity 只放大焦虑/易怒增量，观测到 stability 下降、sensitivity 上升。
+    targets: { stability: -1, sensitivity: 1 },
+    others: ['energy', 'social_drive', 'closeness_need', 'physical_comfort', 'stress'],
+    targetFloor: 0.005
+  },
+  {
+    key: 'cycleMoodVariability',
+    // 焦虑/易怒/正性情感整体 × mood_variability。
+    targets: { stability: -1, sensitivity: 1, social_drive: -1 },
+    others: ['energy', 'closeness_need', 'physical_comfort', 'stress'],
+    targetFloor: 0.002
+  },
+  {
+    key: 'cycleIntimacyVariability',
+    // intimacy_need_delta × intimacy_variability。
+    targets: { closeness_need: -1 },
+    others: ['energy', 'stability', 'sensitivity', 'social_drive', 'physical_comfort', 'stress'],
+    targetFloor: 0.003
+  }
+]);
+
+test('E-B EB1 未配置与显式四键 1.0 完全等价：同初始状态、同种子、逐 tick 全量比对', async () => {
+  const base = await profileSequence({});
+  const explicit = await profileSequence({
+    cyclePainSensitivity: 1,
+    cycleLutealSensitivity: 1,
+    cycleMoodVariability: 1,
+    cycleIntimacyVariability: 1
+  });
+  assert.deepEqual(explicit.states, base.states, '显式四键 1.0 必须与缺省逐 tick 完全一致');
+  assert.deepEqual(explicit.phases, base.phases);
+});
+
+test('E-B EB2 四个 profile 设置分别单独生效：目标维改变、非目标维稳定', async () => {
+  const base = await profileSequence({});
+  const baseState = base.states.at(-1);
+  for (const item of EB2_CASES) {
+    const run = await profileSequence({ [item.key]: 1.5 });
+    assertDirectionalDiff(moodDiff(baseState, run.states.at(-1)), item, item.key);
+  }
+
+  // luteal_sensitivity 专项：窗口确实经过黄体相位，并且黄体区间本身贡献了主要差异。
+  // 注意 phaseWeights 对 boundary=0 取前一段（luteal）做 crossfade，所以周期起点会有一个
+  // 与黄体权重同源的小瞬态，随后在卵泡期衰减；真正的黄体贡献集中在 luteal_like 区间。
+  const luteal = await profileSequence({ cycleLutealSensitivity: 1.5 });
+  const covered = new Set(luteal.phases);
+  assert.deepEqual(
+    [...covered].sort(),
+    ['follicular_like', 'luteal_like', 'menstrual_like', 'ovulatory_like'],
+    '28 天窗口必须覆盖四个周期相位'
+  );
+  const stabilitySeries = luteal.states.map((state, index) => moodDiff(base.states[index], state).stability);
+  const follicularStart = luteal.phases.indexOf('follicular_like');
+  assert.ok(
+    Math.abs(stabilitySeries[follicularStart + 5]) < 1e-5,
+    `卵泡期应衰减到无差异，实际 Δ=${stabilitySeries[follicularStart + 5]}`
+  );
+  const firstLuteal = luteal.phases.indexOf('luteal_like');
+  const lastLuteal = luteal.phases.lastIndexOf('luteal_like');
+  const entry = stabilitySeries[firstLuteal - 1];
+  const plateau = stabilitySeries[lastLuteal];
+  assert.ok(
+    plateau < entry - 0.01,
+    `黄体区间必须产生主要贡献：进入前 Δ=${entry}，黄体末 Δ=${plateau}`
+  );
+  for (let index = firstLuteal + 1; index <= lastLuteal; index += 1) {
+    assert.ok(
+      stabilitySeries[index] <= stabilitySeries[index - 1] + 1e-9,
+      `黄体区间 stability 差异应单调累积，第 ${index} 步 Δ=${stabilitySeries[index]}`
+    );
+  }
+  assert.ok(plateau < -0.01, `黄体末 stability 应显著下降，实际 Δ=${plateau}`);
+});
+
+test('E-B EB3 非法值经真实 E-A 规范化入口回退 1.0：不抛错、与缺省完全一致', async () => {
+  const base = await profileSequence({});
+  const illegal = await profileSequence({
+    cyclePainSensitivity: '2', // type
+    cycleLutealSensitivity: NaN, // non_finite
+    cycleMoodVariability: null, // type
+    cycleIntimacyVariability: 99 // range
+  });
+  assert.deepEqual(illegal.states, base.states, '回退后必须与缺省逐 tick 完全一致');
+  assert.equal(
+    illegal.h.logs.some((entry) => entry.code === 'INVALID_REQUEST'),
+    false,
+    '回退后的配置不得触发 resolveProfile 的 INVALID_REQUEST'
+  );
+  const configLog = illegal.h.logs.find((entry) => entry.code === 'FASTCFG_INVALID');
+  assert.ok(configLog, 'setup 必须记录 FASTCFG_INVALID');
+  assert.equal(configLog.warnings.length, 3, 'type / non_finite / range 各去重一条');
+  assert.equal(configLog.errors.length, 4, 'errors 仍逐键保留明细');
+});
+
+test('E-B EB4 pain=0 与 pain=1.5 差异可重复、可解释，周期相位与长度不变', async () => {
+  const base = await profileSequence({});
+  const low = await profileSequence({ cyclePainSensitivity: 0 });
+  const high = await profileSequence({ cyclePainSensitivity: 1.5 });
+
+  for (let step = 0; step < low.states.length; step += 1) {
+    assert.equal(low.states[step].cycle.phase, high.states[step].cycle.phase, `第 ${step} 步相位`);
+    assert.equal(
+      low.states[step].cycle.cycle_length_days,
+      high.states[step].cycle.cycle_length_days,
+      `第 ${step} 步周期长度`
+    );
+  }
+  assert.ok(high.phases.includes('luteal_like'), '窗口必须覆盖黄体相位');
+
+  const diff = moodDiff(high.states.at(-1), low.states.at(-1));
+  assert.ok(diff.physical_comfort > 0.05, `pain=0 应显著抬升 physical_comfort，实际 Δ=${diff.physical_comfort}`);
+  assert.ok(diff.energy > 0.02, `pain=0 应显著抬升 energy，实际 Δ=${diff.energy}`);
+
+  // 可重复：同配置从零再跑一遍，逐 tick 全量一致；且与缺省确有差异。
+  const repeat = await executeProfileSequence({ cyclePainSensitivity: 1.5 });
+  assert.deepEqual(repeat.states, high.states, '同配置重复执行必须逐步一致');
+  assert.notDeepEqual(high.states.at(-1).mood, base.states.at(-1).mood);
+});
+
+test('E-B EB5 profile 透传不改持久化结构，也不回写宿主设置', async () => {
+  const base = await profileSequence({});
+  const pain = await profileSequence({ cyclePainSensitivity: 1.5 });
+  const baseState = base.states.at(-1);
+  const painState = pain.states.at(-1);
+
+  assert.deepEqual(Object.keys(painState).sort(), Object.keys(baseState).sort(), 'state 顶层键集');
+  assert.deepEqual(Object.keys(painState.mood).sort(), Object.keys(baseState.mood).sort(), 'mood 键集');
+  assert.deepEqual(Object.keys(painState.cycle).sort(), Object.keys(baseState.cycle).sort(), 'cycle 键集');
+
+  const serialized = JSON.stringify(painState);
+  assert.equal(serialized.includes('pain_sensitivity'), false, 'profile 不得落入持久化 state');
+  assert.equal(serialized.includes('"profile"'), false, 'config.cycle.profile 不得落入持久化 state');
+
+  // 引擎配置只在调用栈内构造：不新增宿主配置键，也不回写设置值。
+  assert.equal('cycle' in pain.h.config, false, '宿主配置不得出现引擎专用的 cycle 键');
+  assert.equal(pain.h.config.cyclePainSensitivity, 1.5, '宿主设置值不得被引擎改写');
+  assert.equal(
+    pain.h.config.cycleIntimacyVariability,
+    undefined,
+    '未显式设置的扁平键不得被引擎补写进宿主配置'
+  );
+
+  // 连续调用不污染后续执行：同一进程内重跑缺省配置，逐步仍与首次一致。
+  const replay = await executeProfileSequence({});
+  assert.deepEqual(replay.states, base.states, '缺省配置重跑必须与首次逐 tick 一致');
+});

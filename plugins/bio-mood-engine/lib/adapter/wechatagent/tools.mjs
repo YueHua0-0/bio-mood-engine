@@ -76,8 +76,25 @@ function disabledResult() {
   return degradedResult([], { details: { warnings: [], reason: 'disabled' } });
 }
 
-function engineConfigOf(state) {
-  return { timezone: state.timezone };
+const PROFILE_CONFIG_KEYS = Object.freeze({
+  pain_sensitivity: 'cyclePainSensitivity',
+  luteal_sensitivity: 'cycleLutealSensitivity',
+  mood_variability: 'cycleMoodVariability',
+  intimacy_variability: 'cycleIntimacyVariability'
+});
+
+/**
+ * 00 §8 / 13 §4.4：扁平设置 → config.cycle.profile 的字段映射。
+ * 这里只做映射：类型、范围与非法值回退已由 normalizeConfig（E-A）完成，不重复校验。
+ * 每次调用都新建 profile 对象，避免跨调用共享可变状态。
+ */
+function engineConfigOf(state, settings) {
+  const profile = {};
+  for (const [internal, external] of Object.entries(PROFILE_CONFIG_KEYS)) {
+    const value = settings ? settings[external] : undefined;
+    profile[internal] = typeof value === 'number' ? value : 1;
+  }
+  return { timezone: state.timezone, cycle: { profile } };
 }
 
 function settingsOfRuntime(runtime) {
@@ -133,14 +150,14 @@ function providerOf(state) {
   return RandomProvider.fromPersisted({ random: state.random, character_id: state.character_id });
 }
 
-function runAdvance(state, event, now, pending = []) {
+function runAdvance(state, event, now, pending = [], settings) {
   const started = Date.now();
   const result = advance({
     state,
     event,
     now,
     rngProvider: providerOf(state),
-    config: engineConfigOf(state),
+    config: engineConfigOf(state, settings),
     modules: MODULES,
     queue: pending
   });
@@ -406,7 +423,7 @@ export async function observe(params, runtime = {}) {
         )) {
           await tx.appendEvent(expired);
         }
-        const result = runAdvance(state, normalized.event, normalized.event.occurred_at, queue);
+        const result = runAdvance(state, normalized.event, normalized.event.occurred_at, queue, settings);
 
         await tx.putState(result.state, state.state_version);
         await tx.appendEvent(logRecord);
@@ -606,7 +623,7 @@ export async function tick(params = {}, runtime = {}) {
             await tx.appendEvent(expired);
           }
         }
-        const result = runAdvance(current.state, null, now, queue);
+        const result = runAdvance(current.state, null, now, queue, settings);
         if (!dryRun) await tx.putState(result.state, current.state.state_version);
         return {
           missing: false,
