@@ -886,3 +886,34 @@ test('C2-B T9：closeness_need cycle 渠道 —— CYCLE_GAIN × w_intimacy.init
   assert.equal(out.sensitivity, 0);
   assert.equal(out.social_drive, 0);
 });
+
+// C2-B CT1：九维周期贡献权重与冻结契约一致（Contract Test）
+// 与 T7 计算映射测试互补——T7 用生产权重验证公式；
+// CT1 独立断言生产权重值仍然符合冻结设计参数。
+// 若有人误改 constants.mjs 中的 initial 值，此测试会立即失败。
+test('C2-B CT1：CYCLE_CONTRIB_WEIGHTS 与冻结契约一致（Contract Test）', () => {
+  const expectedInitial = Object.freeze({
+    w_pain_pc:       0.20,
+    w_pain_energy:   0.10,
+    w_anx_stab:      0.15,
+    w_anx_sens:      0.10,
+    w_irr_stab:      0.12,
+    w_irr_sens:      0.12,
+    w_pos_stab:      0.10,
+    w_pos_social:    0.10,
+    w_intimacy:      0.25
+  });
+  for (const [key, expectedVal] of Object.entries(expectedInitial)) {
+    const actual = CYCLE_CONTRIB_WEIGHTS[key];
+    assert.ok(actual, `${key} 必须存在于 CYCLE_CONTRIB_WEIGHTS`);
+    assert.equal(actual.initial, expectedVal,
+      `${key}.initial 冻结值 ${expectedVal}，实际 ${actual.initial}（权重被篡改？）`);
+    // range 必须存在且为 [0, max] 形式
+    assert.ok(Array.isArray(actual.range), `${key}.range 必须是数组`);
+    assert.equal(actual.range.length, 2, `${key}.range 必须有 [min, max] 两项`);
+    assert.ok(actual.range[0] >= 0, `${key}.range[0] 必须 ≥ 0`);
+    assert.ok(actual.range[1] >= actual.initial, `${key}.range[1] 必须 ≥ initial`);
+  }
+  // 额外：契约规定 CYCLE_GAIN = 0.6
+  assert.equal(CYCLE_GAIN, 0.6, 'CYCLE_GAIN 冻结值 0.6，实际被篡改？');
+});
