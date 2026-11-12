@@ -368,3 +368,351 @@ test('§4.1 导出面与 cycleContribution / computeContributions 语义', async
 test('DELTA_LIMITS.mood 与 09 §5.3 冻结值一致', () => {
   assert.deepEqual(DELTA_LIMITS.mood, { normal: 0.06, severe: 0.12, hard: 0.15 });
 });
+
+// ============================================================
+// C2-A：phase_vector 严格输入校验（v1.7.14）
+// 测试通过 updateMood() 公开入口触发，不导出 readPhaseVector。
+// ============================================================
+
+/** 九维合法 phase_vector（V2）。 */
+const VALID_V2_VECTOR = Object.freeze({
+  physical_comfort: 0.05,
+  energy: 0.06,
+  sensitivity: -0.02,
+  social_drive: 0.05,
+  pain_load: 0.30,
+  anxiety_delta: 0.10,
+  irritability_delta: 0.08,
+  positive_affect_delta: 0.15,
+  intimacy_need_delta: 0.20
+});
+
+/** 四维合法 phase_vector（V1，兼容降级）。 */
+const VALID_V1_VECTOR = Object.freeze({
+  physical_comfort: 0.05,
+  energy: 0.06,
+  sensitivity: -0.02,
+  social_drive: 0.05
+});
+
+/**
+ * 调用 updateMood 并断言抛 MODULE_FAILED。
+ * 同时断言错误对象包含 code='MODULE_FAILED' 和 module='mood'。
+ * @param {object} inputsOverride 替换 makeInputs 中的 cycle 部分
+ * @param {object} [expectedDetails] 可选 details 字段断言
+ */
+function assertMoodFailed(inputsOverride, expectedDetails) {
+  const prev = makeMood();
+  let result;
+  assert.throws(() => {
+    result = runMood({ previous: prev, inputs: { ...makeInputs(), ...inputsOverride } });
+  }, (err) => {
+    assert.equal(err.code, 'MODULE_FAILED', `expect MODULE_FAILED, got ${err.code}`);
+    assert.ok(err.details, `expect err.details to exist`);
+    assert.equal(err.details.module, 'mood', `expect err.details.module='mood', got ${err.details?.module}`);
+    if (expectedDetails) {
+      for (const [k, v] of Object.entries(expectedDetails)) {
+        assert.equal(err.details[k], v, `expect err.details.${k}=${v}, got ${err.details?.[k]}`);
+      }
+    }
+    return true;
+  });
+  // T19：原子性 —— 错误发生前 updateMood 不应写入任何状态
+  assert.ok(result === undefined, 'updateMood 抛错后不应返回状态对象');
+}
+
+// T1：合法四维（V1）—— 接受
+test('C2-A T1：合法四维（V1）phase_vector 被接受', () => {
+  const prev = makeMood();
+  const inputs = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: { ...VALID_V1_VECTOR }, scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const result = runMood({ previous: prev, inputs });
+  assert.ok(result && typeof result.state === 'object');
+  // 旧四维贡献应正常（cycleTerms 只看四维）
+  const cycleContrib = result.contributions['mood.energy'].cycle;
+  assert.ok(typeof cycleContrib === 'number');
+});
+
+// T2：合法九维（V2）—— 接受
+test('C2-A T2：合法九维（V2）phase_vector 被接受', () => {
+  const prev = makeMood();
+  const inputs = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: { ...VALID_V2_VECTOR }, scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const result = runMood({ previous: prev, inputs });
+  assert.ok(result && typeof result.state === 'object');
+});
+
+// T3：键顺序打乱 —— 接受（形状校验按排序比对）
+test('C2-A T3：键顺序打乱（四维、九维）均被接受', () => {
+  const v1Shuffled = { energy: 0.1, social_drive: 0.1, physical_comfort: 0.1, sensitivity: 0.1 };
+  const v2Shuffled = {
+    social_drive: 0.1, anxiety_delta: 0.1, physical_comfort: 0.1, intimacy_need_delta: 0.1,
+    positive_affect_delta: 0.1, sensitivity: 0.1, irritability_delta: 0.1, pain_load: 0.1, energy: 0.1
+  };
+  for (const vec of [v1Shuffled, v2Shuffled]) {
+    const prev = makeMood();
+    const inputs = {
+      ...makeInputs(),
+      cycle: { phase: 'follicular_like', phase_vector: vec, scalars: { cycle_sensitivity: 0.45 } }
+    };
+    const result = runMood({ previous: prev, inputs });
+    assert.ok(result && typeof result.state === 'object');
+  }
+});
+
+// T4：缺一个键 —— MODULE_FAILED
+test('C2-A T4：缺少一个键 —— MODULE_FAILED', () => {
+  const v1Missing = { physical_comfort: 0.1, energy: 0.1, sensitivity: 0.1 }; // 少 social_drive
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: v1Missing, scalars: { cycle_sensitivity: 0.45 } }
+  });
+  const v2Missing = { ...VALID_V2_VECTOR }; delete v2Missing.energy;
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: v2Missing, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T5：多一个多余键 —— MODULE_FAILED
+test('C2-A T5：多余键 —— MODULE_FAILED', () => {
+  const v1Extra = { ...VALID_V1_VECTOR, unknown_extra: 0.1 };
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: v1Extra, scalars: { cycle_sensitivity: 0.45 } }
+  });
+  const v2Extra = { ...VALID_V2_VECTOR, unknown_extra: 0.1 };
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: v2Extra, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T6：空对象 —— MODULE_FAILED
+test('C2-A T6：空对象 —— MODULE_FAILED', () => {
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: {}, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T7：数组 —— MODULE_FAILED
+test('C2-A T7：phase_vector 为数组 —— MODULE_FAILED', () => {
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: [], scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T8：显式 null —— MODULE_FAILED
+test('C2-A T8：phase_vector 显式 null —— MODULE_FAILED', () => {
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: null, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T8b：cycleInput 本身显式 null —— MODULE_FAILED
+test('C2-A T8b：cycleInput 本身显式 null —— MODULE_FAILED', () => {
+  // 通过覆盖 inputs.cycle 为 null
+  assertMoodFailed({ cycle: null });
+});
+
+// T9：phase_vector 属性缺失或 undefined —— 降级全零向量 + missing=true
+test('C2-A T9：phase_vector 缺失或 undefined —— 降级全零向量', () => {
+  const prev = makeMood();
+  // 场景 A：cycleInput 有 phase 属性但无 phase_vector 属性
+  const inputsNoKey = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const rng1 = makeStream();
+  const resultA = runMood({ previous: prev, inputs: inputsNoKey, rng: rng1 });
+  assert.ok(resultA && typeof resultA.state === 'object', '缺失属性应降级，不是抛错');
+
+  // 场景 B：phase_vector 显式 undefined
+  const inputsUnd = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: undefined, scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const rng2 = makeStream();
+  const resultB = runMood({ previous: prev, inputs: inputsUnd, rng: rng2 });
+  assert.ok(resultB && typeof resultB.state === 'object', 'undefined 应降级');
+});
+
+// T10：向量存在，某值为 undefined —— MODULE_FAILED
+test('C2-A T10：向量值为 undefined —— MODULE_FAILED', () => {
+  const bad = { ...VALID_V2_VECTOR }; bad.energy = undefined;
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: bad, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T11：向量值为 null —— MODULE_FAILED
+test('C2-A T11：向量值为 null —— MODULE_FAILED', () => {
+  const bad = { ...VALID_V2_VECTOR }; bad.energy = null;
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: bad, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T12：向量值为 string / boolean —— MODULE_FAILED
+test('C2-A T12：向量值为非 number 原始类型 —— MODULE_FAILED', () => {
+  for (const badVal of ['0.1', true, false, 'hello']) {
+    const bad = { ...VALID_V2_VECTOR }; bad.energy = badVal;
+    assertMoodFailed({
+      cycle: { phase: 'follicular_like', phase_vector: bad, scalars: { cycle_sensitivity: 0.45 } }
+    });
+  }
+});
+
+// T12b：new Number(0) 装箱对象 —— MODULE_FAILED（typeof 不是 'number'）
+test('C2-A T12b：向量值为 new Number(0) 装箱对象 —— MODULE_FAILED', () => {
+  const bad = { ...VALID_V2_VECTOR }; bad.energy = new Number(0);
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: bad, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T13：NaN / Infinity / -Infinity —— MODULE_FAILED
+test('C2-A T13：向量值为非有限数 —— MODULE_FAILED', () => {
+  for (const badVal of [NaN, Infinity, -Infinity]) {
+    const bad = { ...VALID_V2_VECTOR }; bad.energy = badVal;
+    assertMoodFailed({
+      cycle: { phase: 'follicular_like', phase_vector: bad, scalars: { cycle_sensitivity: 0.45 } }
+    });
+  }
+});
+
+// T14：数值越界（±1.01）—— MODULE_FAILED（不再静默 clamp）
+test('C2-A T14：向量值越界 ±1.01 —— MODULE_FAILED', () => {
+  const badPos = { ...VALID_V2_VECTOR }; badPos.energy = 1.01;
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: badPos, scalars: { cycle_sensitivity: 0.45 } }
+  });
+  const badNeg = { ...VALID_V2_VECTOR }; badNeg.energy = -1.01;
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: badNeg, scalars: { cycle_sensitivity: 0.45 } }
+  });
+  // 特殊：Number.MAX_VALUE 远超范围
+  const maxV = { ...VALID_V2_VECTOR }; maxV.energy = Number.MAX_VALUE;
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: maxV, scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+// T15：边界值（1 / -1 / 0 / Number.MIN_VALUE / -0）—— 接受
+test('C2-A T15：边界值 ±1 / 0 / MIN_VALUE / -0 均被接受', () => {
+  const boundaryV = {
+    physical_comfort: 1,
+    energy: -1,
+    sensitivity: 0,
+    social_drive: Number.MIN_VALUE, // ~5e-324，非常接近 0 的正数，合法
+    pain_load: -0, // -0 === 0，合法
+    anxiety_delta: 0.5,
+    irritability_delta: 0.5,
+    positive_affect_delta: 0.5,
+    intimacy_need_delta: 0.5
+  };
+  const prev = makeMood();
+  const inputs = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: boundaryV, scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const rng = makeStream();
+  const result = runMood({ previous: prev, inputs, rng });
+  // 只需验证合法输入被接受，完整 mood 更新成功
+  assert.ok(result && typeof result.state === 'object');
+  assert.equal(result.state.model_version, 1);
+});
+
+// T16：合法九维调用 cycleTerms，旧四维贡献与纯四维输入一致
+test('C2-A T16：九维 vector 下 cycleTerms 旧四维贡献与 V1 输入完全一致', () => {
+  // 通过 runMood 的 contributions 输出来验证 cycleTerms 对旧四维的处理。
+  // 仅 energy 字段设为已知值，其余四维为 0；新五维全部为 0。
+  const prev = makeMood();
+  const v1OnlyEnergy = { ...VALID_V1_VECTOR, energy: 0.10, physical_comfort: 0, sensitivity: 0, social_drive: 0 };
+  const v2OnlyEnergy = { ...VALID_V2_VECTOR, energy: 0.10, physical_comfort: 0, sensitivity: 0, social_drive: 0,
+    pain_load: 0, anxiety_delta: 0, irritability_delta: 0, positive_affect_delta: 0, intimacy_need_delta: 0 };
+
+  const cycleSens = 0.5;
+  const inputsV1 = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: v1OnlyEnergy, scalars: { cycle_sensitivity: cycleSens } }
+  };
+  const inputsV2 = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: v2OnlyEnergy, scalars: { cycle_sensitivity: cycleSens } }
+  };
+  const rng1 = makeStream();
+  const rng2 = makeStream();
+  const resultV1 = runMood({ previous: prev, inputs: inputsV1, rng: rng1 });
+  const resultV2 = runMood({ previous: prev, inputs: inputsV2, rng: rng2 });
+
+  // 验证 cycle.energy 贡献值相同 —— cycleTerms 只看四维字段，新五维为 0 时贡献应一致
+  assert.equal(resultV1.contributions['mood.energy'].cycle, resultV2.contributions['mood.energy'].cycle);
+  assert.equal(resultV1.contributions['mood.physical_comfort'].cycle, resultV2.contributions['mood.physical_comfort'].cycle);
+  assert.equal(resultV1.contributions['mood.sensitivity'].cycle, resultV2.contributions['mood.sensitivity'].cycle);
+  assert.equal(resultV1.contributions['mood.social_drive'].cycle, resultV2.contributions['mood.social_drive'].cycle);
+  // stability 的 cycle 贡献（cycleSensitivity 偏移）也应相同
+  assert.equal(resultV1.contributions['mood.stability'].cycle, resultV2.contributions['mood.stability'].cycle);
+});
+
+// T17：合法九维输入完整 mood 更新成功（公开接口行为验证）
+test('C2-A T17：合法九维输入触发完整 mood 更新', () => {
+  const prev = makeMood();
+  const inputs = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: { ...VALID_V2_VECTOR }, scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const result = runMood({ previous: prev, inputs });
+  // 七维状态全部被写入
+  for (const key of Object.keys(MOOD_HOME)) {
+    assert.ok(typeof result.state[key] === 'number', `mood.${key} 必须是 number`);
+  }
+  // model_version 应保留 1（C2-A 不升级版本）
+  assert.equal(result.state.model_version, 1);
+});
+
+// T19：非法输入失败时 mood 状态未被部分更新（原子性）
+test('C2-A T19：非法 phase_vector 输入后 mood 状态无部分更新 —— 原子性', () => {
+  const prev = makeMood();
+  const prevSnapshot = JSON.parse(JSON.stringify(prev));
+
+  // 触发非法输入（多余键 → MODULE_FAILED）
+  assert.throws(() => {
+    runMood({ previous: prev, inputs: {
+      ...makeInputs(),
+      cycle: { phase: 'follicular_like', phase_vector: { ...VALID_V1_VECTOR, extra_bad_key: 0.1 }, scalars: { cycle_sensitivity: 0.45 } }
+    }});
+  }, (err) => {
+    assert.equal(err.code, 'MODULE_FAILED');
+    assert.equal(err.details.module, 'mood');
+    return true;
+  });
+
+  // previous 对象本身不应被 updateMood 修改（它只读取 previous）
+  assert.deepEqual(prev, prevSnapshot, 'previous 对象不应被副作用修改');
+});
+
+// C2-A 额外：非普通对象守卫（Date / Map / null-prototype 对象）
+test('C2-A：非普通对象（Date / Map）—— MODULE_FAILED', () => {
+  const badDate = Object.assign({}, VALID_V2_VECTOR, {}); // 还是普通对象，但 Date 本身不行
+  // Date 实例
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: new Date(), scalars: { cycle_sensitivity: 0.45 } }
+  });
+  // Map
+  assertMoodFailed({
+    cycle: { phase: 'follicular_like', phase_vector: new Map(), scalars: { cycle_sensitivity: 0.45 } }
+  });
+});
+
+test('C2-A：null-prototype 对象（Object.create(null)）—— 被接受（isPlainObject 返回 true）', () => {
+  const nullProto = Object.create(null);
+  for (const [k, v] of Object.entries(VALID_V2_VECTOR)) nullProto[k] = v;
+  const prev = makeMood();
+  const inputs = {
+    ...makeInputs(),
+    cycle: { phase: 'follicular_like', phase_vector: nullProto, scalars: { cycle_sensitivity: 0.45 } }
+  };
+  const result = runMood({ previous: prev, inputs });
+  assert.ok(result && typeof result.state === 'object');
+});
