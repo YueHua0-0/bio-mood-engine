@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { CYCLE_PHASES, LIMITS } from '../../lib/core/constants.mjs';
+import { CYCLE_PHASES, LIMITS, PHASE_VECTOR_KEYS_V2 } from '../../lib/core/constants.mjs';
 import { parseTime, toIso } from '../../lib/core/clock.mjs';
 import { createDefaultState, round6, validateState } from '../../lib/core/models.mjs';
 import { RandomProvider } from '../../lib/core/random.mjs';
@@ -354,7 +354,7 @@ test('C12c：一次推进 10 年 → 最多 64 次逐周期采样，不超时', 
   assertCycleState(out);
 });
 
-test('C13 补充：原始逐日差（九维 phase_impact）≤ 阶段最大差 + 余量', () => {
+test('C13-A 补充：原始逐日差（九维 phase_impact）≤ 阶段最大差 + 余量', () => {
   const RAW_MAX = {
     physical_comfort: 0.15, energy: 0.15, sensitivity: 0.15, social_drive: 0.15,
     pain_load: 0.65, anxiety_delta: 0.35, irritability_delta: 0.40,
@@ -543,7 +543,7 @@ test('降级：previous 缺字段时省略整个 derived 键并追加 MISSING_CY
   }
 });
 
-test('ModuleResult 形状：完整字段 + diagnostics 固定值 + derived 四维向量', () => {
+test('ModuleResult 形状：完整字段 + diagnostics 固定值 + derived 九维向量（v1.7.14 周期扩展）', () => {
   const result = updateCycle({
     previous: makeCycle(),
     inputs: {},
@@ -561,15 +561,26 @@ test('ModuleResult 形状：完整字段 + diagnostics 固定值 + derived 四�
   assert.ok(Array.isArray(result.warnings));
   assert.equal(result.next_transition_at, null);
   assert.deepEqual(Object.keys(result.derived), ['phase_impact']);
-  assert.deepEqual(Object.keys(result.derived.phase_impact).sort(), [
-    'energy',
-    'physical_comfort',
-    'sensitivity',
-    'social_drive'
-  ]);
+  // C1-F01：derived.phase_impact 必须完整包含九维（键集与常量严格一致，不从测试复制清单）
+  assert.deepEqual(
+    Object.keys(result.derived.phase_impact).sort(),
+    [...PHASE_VECTOR_KEYS_V2].sort(),
+    'phase_impact 键集必须与 PHASE_VECTOR_KEYS_V2 常量完全一致'
+  );
   for (const value of Object.values(result.derived.phase_impact)) {
     assert.equal(Number.isFinite(value), true);
     assert.notEqual(Object.is(value, -0), true);
+  }
+  // 明确断言九维数量为 9
+  assert.equal(Object.keys(result.derived.phase_impact).length, 9,
+    'phase_impact 必须恰好包含 9 个字段（旧四维 + 新五维）');
+  // 各字段值域：pain_load ∈ [0,1]，其余 ∈ [-1,1]
+  assert.ok(result.derived.phase_impact.pain_load >= 0 && result.derived.phase_impact.pain_load <= 1);
+  const signedKeys = ['physical_comfort', 'energy', 'sensitivity', 'social_drive',
+    'anxiety_delta', 'irritability_delta', 'positive_affect_delta', 'intimacy_need_delta'];
+  for (const key of signedKeys) {
+    assert.ok(result.derived.phase_impact[key] >= -1 && result.derived.phase_impact[key] <= 1,
+      `${key}=${result.derived.phase_impact[key]} 越界`);
   }
 
   const base = createDefaultState({

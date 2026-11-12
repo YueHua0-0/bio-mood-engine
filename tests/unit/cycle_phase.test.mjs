@@ -133,7 +133,7 @@ test('phaseWeights 在 p=0（menstrual_like 阶段中心）返回 w_menstrual=1'
   assert.equal(w.luteal_like, 0);
 });
 
-test('C13：跨越边界逐日采样（九维 profile=1.0），相邻两天 pain_load 差 ≤0.55，其余 ≤0.45', () => {
+test('C13-A：跨越边界逐日采样（九维 profile=1.0），相邻两天 pain_load 差 ≤0.55，其余 ≤0.45', () => {
   let previous = null;
   let crossings = 0;
   let lastPhase = phaseAt(0);
@@ -191,3 +191,225 @@ test('profile 隔离：pain_sensitivity 只影响 pain_load，不改变旧四维
   assert.equal(base.social_drive, hi.social_drive);
   assert.equal(base.anxiety_delta, hi.anxiety_delta, 'pain_sensitivity 不应影响 anxiety_delta');
 });
+
+// === profile 严格校验（C1-F02） ===
+
+function expectInvalidRequest(fn, key) {
+  try {
+    fn();
+    assert.fail(`应抛 INVALID_REQUEST（${key}）`);
+  } catch (err) {
+    assert.equal(err.code, 'INVALID_REQUEST', `${key} 应抛 INVALID_REQUEST，实际 ${err.code}`);
+    assert.ok(err.details && err.details.path !== undefined, `${key} 应带 details.path`);
+  }
+}
+
+test('profile 隔离：单独改变 mood_variability 只影响 anxiety/irritability/positive_affect_delta', () => {
+  const base = phaseInfluence(0.76, L, {});
+  const hi = phaseInfluence(0.76, L, { mood_variability: 1.5 });
+  assert.notEqual(base.anxiety_delta, hi.anxiety_delta);
+  assert.notEqual(base.irritability_delta, hi.irritability_delta);
+  assert.notEqual(base.positive_affect_delta, hi.positive_affect_delta);
+  assert.equal(base.pain_load, hi.pain_load, 'pain_load 不应受 mood_variability 影响');
+  assert.equal(base.intimacy_need_delta, hi.intimacy_need_delta);
+  assert.equal(base.physical_comfort, hi.physical_comfort, '旧四维不变');
+  assert.equal(base.energy, hi.energy);
+  assert.equal(base.sensitivity, hi.sensitivity);
+  assert.equal(base.social_drive, hi.social_drive);
+});
+
+test('profile 隔离：单独改变 intimacy_variability 只影响 intimacy_need_delta', () => {
+  const base = phaseInfluence(0.485, L, {});
+  const hi = phaseInfluence(0.485, L, { intimacy_variability: 1.5 });
+  assert.notEqual(base.intimacy_need_delta, hi.intimacy_need_delta);
+  assert.equal(base.anxiety_delta, hi.anxiety_delta, 'anxiety_delta 不变');
+  assert.equal(base.irritability_delta, hi.irritability_delta);
+  assert.equal(base.pain_load, hi.pain_load);
+  assert.equal(base.physical_comfort, hi.physical_comfort, '旧四维不变');
+});
+
+test('profile 非法类型：四个键分别测试 string / null / boolean', () => {
+  const BAD_TYPE_CASES = [
+    { key: 'pain_sensitivity', value: '1.5' },
+    { key: 'luteal_sensitivity', value: null },
+    { key: 'mood_variability', value: true },
+    { key: 'intimacy_variability', value: '0.5' }
+  ];
+  for (const { key, value } of BAD_TYPE_CASES) {
+    expectInvalidRequest(() => phaseInfluence(0.09, L, { [key]: value }), `${key}=${JSON.stringify(value)}`);
+  }
+});
+
+test('profile 非法有限性：四个键分别测试 NaN / Infinity', () => {
+  const BAD_FINITE_CASES = [
+    { key: 'pain_sensitivity', value: NaN },
+    { key: 'luteal_sensitivity', value: Infinity },
+    { key: 'mood_variability', value: -Infinity },
+    { key: 'intimacy_variability', value: NaN }
+  ];
+  for (const { key, value } of BAD_FINITE_CASES) {
+    expectInvalidRequest(() => phaseInfluence(0.09, L, { [key]: value }), `${key}=${String(value)}`);
+  }
+});
+
+test('profile 越界：四个键分别测试 -0.01 / 1.51', () => {
+  const BAD_RANGE_CASES = [
+    { key: 'pain_sensitivity', value: -0.01 },
+    { key: 'luteal_sensitivity', value: 1.51 },
+    { key: 'mood_variability', value: 1.51 },
+    { key: 'intimacy_variability', value: -0.01 }
+  ];
+  for (const { key, value } of BAD_RANGE_CASES) {
+    expectInvalidRequest(() => phaseInfluence(0.09, L, { [key]: value }), `${key}=${value}`);
+  }
+});
+
+test('profile 非法：显式传入 null / array 作为整个 profile', () => {
+  expectInvalidRequest(() => phaseInfluence(0.09, L, { cycle: { profile: null } }), 'profile=null');
+  expectInvalidRequest(() => phaseInfluence(0.09, L, { cycle: { profile: [1, 2] } }), 'profile=array');
+});
+
+test('profile 合法边界值：0 和 1.5 均被接受', () => {
+  assert.doesNotThrow(() => phaseInfluence(0.09, L, { pain_sensitivity: 0 }));
+  assert.doesNotThrow(() => phaseInfluence(0.09, L, { pain_sensitivity: 1.5 }));
+  assert.doesNotThrow(() => phaseInfluence(0.09, L, {
+    pain_sensitivity: 0, luteal_sensitivity: 0, mood_variability: 0, intimacy_variability: 0
+  }));
+});
+
+// === phaseWeights 完整补充（边界 / wrap / 窗口端点 / 权重不变量） ===
+
+const PHASE_KEYS = ['menstrual_like', 'follicular_like', 'ovulatory_like', 'luteal_like'];
+
+function assertWeightsInvariant(w, label) {
+  // 四个键始终存在
+  for (const k of PHASE_KEYS) assert.ok(k in w, `${label}: 缺键 ${k}`);
+  // 均为非负有限 number
+  for (const k of PHASE_KEYS) {
+    assert.equal(typeof w[k], 'number', `${label}: ${k} 非 number`);
+    assert.equal(Number.isFinite(w[k]), true, `${label}: ${k} 非有限`);
+    assert.ok(w[k] >= 0, `${label}: ${k} 负数 ${w[k]}`);
+  }
+  // 总和满足 1 ± 1e-9
+  const sum = w.menstrual_like + w.follicular_like + w.ovulatory_like + w.luteal_like;
+  assert.ok(Math.abs(sum - 1) < 1e-9, `${label}: 权重和=${sum}`);
+}
+
+test('phaseWeights 不变量：所有输出满足权重和 = 1 / 非负 / 四键存在', () => {
+  // L=28.4, window=0.5/28.4≈0.0176。覆盖：非过渡区 / 窗口内两侧 / 边界中点 / wrap
+  const probs = [
+    0,                          // wrap 边界（luteal↔menstrual）
+    0.05, 0.09,                 // menstrual 非过渡区
+    0.163, 0.179,               // 0.18 窗口内前侧 / 窗口内靠近边界
+    0.18,                       // 0.18 边界中点
+    0.197,                      // 0.18 窗口内后侧
+    0.25, 0.31,                 // follicular 非过渡区
+    0.423, 0.439,               // 0.44 窗口内前侧 / 窗口内靠近边界
+    0.44,                       // 0.44 边界中点
+    0.457,                      // 0.44 窗口内后侧
+    0.50,                       // ovulatory 非过渡区
+    0.513, 0.529,               // 0.53 窗口内前侧 / 窗口内靠近边界
+    0.53,                       // 0.53 边界中点
+    0.547,                      // 0.53 窗口内后侧
+    0.60, 0.76,                 // luteal 非过渡区
+    0.95, 0.9999, 1             // wrap 边界
+  ];
+  for (const p of probs) {
+    assertWeightsInvariant(phaseWeights(p, L), `p=${p}`);
+  }
+});
+
+test('phaseWeights 非过渡区只有当前阶段权重 = 1', () => {
+  const CASES = [
+    [0.09, 'menstrual_like'],
+    [0.31, 'follicular_like'],
+    [0.485, 'ovulatory_like'],
+    [0.76, 'luteal_like']
+  ];
+  for (const [p, dominant] of CASES) {
+    const w = phaseWeights(p, L);
+    assert.equal(w[dominant], 1, `p=${p} ${dominant} 应=1`);
+    for (const k of PHASE_KEYS) {
+      if (k !== dominant) assert.equal(w[k], 0, `p=${p} ${k} 应=0`);
+    }
+  }
+});
+
+test('phaseWeights 过渡区仅相邻两个阶段权重非零', () => {
+  // 默认 L=28.4：window = 0.5/28.4 ≈ 0.0176
+  const L = 28.4;
+  // p=0.18 恰好是 menstrual→follicular 边界
+  let w = phaseWeights(0.18, L);
+  assert.ok(w.menstrual_like > 0, '边界 w_m > 0');
+  assert.ok(w.follicular_like > 0, '边界 w_f > 0');
+  assert.equal(w.ovulatory_like, 0);
+  assert.equal(w.luteal_like, 0);
+
+  // p=0.44 follicular→ovulatory
+  w = phaseWeights(0.44, L);
+  assert.ok(w.follicular_like > 0);
+  assert.ok(w.ovulatory_like > 0);
+  assert.equal(w.menstrual_like, 0);
+  assert.equal(w.luteal_like, 0);
+
+  // p=0.53 ovulatory→luteal
+  w = phaseWeights(0.53, L);
+  assert.ok(w.ovulatory_like > 0);
+  assert.ok(w.luteal_like > 0);
+  assert.equal(w.menstrual_like, 0);
+  assert.equal(w.follicular_like, 0);
+});
+
+test('phaseWeights 窗口内部非边界点也仅相邻两个阶段非零', () => {
+  // 边界中点已在上方测试；这里验证窗口内任意非边界点行为一致
+  const L = 28.4;
+  // 0.18 窗口 [0.1624, 0.1976]，p=0.179 窗口内前侧
+  let w = phaseWeights(0.179, L);
+  assert.ok(w.menstrual_like > 0 && w.follicular_like > 0);
+  assert.equal(w.ovulatory_like, 0);
+  assert.equal(w.luteal_like, 0);
+
+  // p=0.197 窗口内后侧
+  w = phaseWeights(0.197, L);
+  assert.ok(w.menstrual_like > 0 && w.follicular_like > 0);
+  assert.equal(w.ovulatory_like, 0);
+  assert.equal(w.luteal_like, 0);
+
+  // 0.44 窗口内 p=0.439 (靠近边界前侧) / p=0.457 (窗口内后侧)
+  w = phaseWeights(0.439, L);
+  assert.ok(w.follicular_like > 0 && w.ovulatory_like > 0);
+  assert.equal(w.menstrual_like, 0);
+  assert.equal(w.luteal_like, 0);
+
+  w = phaseWeights(0.529, L); // 0.53 窗口内前侧
+  assert.ok(w.ovulatory_like > 0 && w.luteal_like > 0);
+  assert.equal(w.menstrual_like, 0);
+  assert.equal(w.follicular_like, 0);
+});
+
+test('phaseWeights 首尾 wrap 边界：p=0 和 p=1 是相邻阶段的过渡', () => {
+  // window=0.0176；p=0 距离边界 0 最近，属于 menstrual_like（因为 0 是起点）
+  // 但 p=0 时 nearest=0, distance=0, prevIndex=3(luteal), nextIndex=0(menstrual)
+  let w = phaseWeights(0, L);
+  assert.ok(w.luteal_like > 0, 'p=0 应含 luteal（wrap 过渡）');
+  assert.ok(w.menstrual_like > 0, 'p=0 应含 menstrual');
+
+  w = phaseWeights(1 - 1e-12, L);
+  assert.ok(w.luteal_like > 0, 'p≈1 应含 luteal');
+});
+
+// === C13 验收说明 ===
+//
+// C13-A：九维原始 phase_impact 逐日变化满足各字段 RAW_MAX —— 已在本文件第 136 行实现。
+// C13-A 补充（cycle_advance.test.mjs）：同上，以 L=28.4 为基准独立断言。
+//
+// C13-B（待 C2 完成后验收，本轮不计入 PASS）：
+//   真正的 05 → 09 集成链路：advance → cycle.phase_impact → 09 cycleTerms → alpha 衰减 → 情绪贡献
+//   必须通过实际 advance 调用 09，验证：
+//   - 09 正确读取九维周期向量（或旧四维兼容向量）
+//   - 09 用 CYCLE_CONTRIB_WEIGHTS 九个系数正确计算贡献
+//   - alpha 衰减与多贡献叠加后，单步情绪变化 ≤0.06
+//   - 不得用 clamp 模拟 09 公式后再断言 clamp 生效（那是恒真）
+//
+//   原"clamp(0.6 * rawDelta, -0.06, 0.06) 再断言 ≤0.06"的假测试已在本轮删除。
+//   本文件内不再包含任何模拟 09 行为的断言。
