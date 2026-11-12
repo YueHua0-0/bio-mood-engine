@@ -550,8 +550,8 @@ test('ModuleResult 形状：完整字段 + diagnostics 固定值 + derived 四�
   });
   assert.deepEqual(result.diagnostics, {
     module: 'cycle',
-    model_version: 1,
-    interface_version: 1,
+    model_version: 2,
+    interface_version: 2,
     elapsed_ms: 0
   });
   assert.ok(Array.isArray(result.reason_codes));

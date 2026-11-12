@@ -1,6 +1,7 @@
 /** 02 / 03 的测试桩模块。只允许出现在 tests/ 下，不得放进 lib/。 */
 
 import {
+  INTERFACE_VERSION,
   MOOD_KEYS,
   REGULATION_KEYS
 } from '../../lib/core/constants.mjs';
@@ -16,7 +17,7 @@ export function result(name, state, overrides = {}) {
     reason_codes: [],
     warnings: [],
     next_transition_at: null,
-    diagnostics: { module: name, model_version: 1, interface_version: 1, elapsed_ms: 0 },
+    diagnostics: { module: name, model_version: 1, interface_version: INTERFACE_VERSION, elapsed_ms: 0 },
     ...overrides
   };
 }

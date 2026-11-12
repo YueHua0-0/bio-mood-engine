@@ -1,7 +1,7 @@
 {
-  "contract_version": "v1.7.13",
+  "contract_version": "v1.7.14",
   "schema_version": 1,
-  "interface_version": 1,
+  "interface_version": 2,
   "module_order": [
     "cycle",
     "sleep",

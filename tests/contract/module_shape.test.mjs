@@ -61,7 +61,7 @@ function assertModuleResult(name, result, now) {
     );
   }
   assert.equal(result.diagnostics.module, name, `${name}.diagnostics.module 不符`);
-  assert.equal(result.diagnostics.interface_version, 1, `${name}.diagnostics.interface_version 必须为 1`);
+  assert.equal(result.diagnostics.interface_version, 2, `${name}.diagnostics.interface_version 必须为 2`);
   assert.equal(Number.isInteger(result.diagnostics.model_version), true, `${name}.diagnostics.model_version 必须是整数`);
   assert.equal(typeof result.diagnostics.elapsed_ms, 'number', `${name}.diagnostics.elapsed_ms 必须是数字`);
   assert.ok(Array.isArray(result.reason_codes), `${name}.reason_codes 必须是数组`);
@@ -115,7 +115,7 @@ function stubModule(name, overrides) {
         reason_codes: [],
         warnings: [],
         next_transition_at: null,
-        diagnostics: { module: name, model_version: 1, interface_version: 1, elapsed_ms: 0 },
+        diagnostics: { module: name, model_version: 1, interface_version: 2, elapsed_ms: 0 },
         ...overrides
       };
     }
