@@ -122,7 +122,7 @@ test('T09 meta 丢失：首次打开已有 state 时按已有版本继续，不�
   const { repo, storage } = memoryRepo({ initial: { state: initial } });
   const loaded = await repo.loadState(CHARACTER_ID);
   assert.equal(loaded.state_version, initial.state_version);
-  assert.deepEqual(loaded, initial);
+  assert.deepEqual(loaded, { ...initial, config_version: 2 });
   assert.deepEqual(storage.json('state'), initial);
 });
 
