@@ -655,3 +655,56 @@ test('E-B EB5 profile 透传不改持久化结构，也不回写宿主设置', a
   const replay = await executeProfileSequence({});
   assert.deepEqual(replay.states, base.states, '缺省配置重跑必须与首次逐 tick 一致');
 });
+
+test('E-B EB6 组合配置逐键隔离：四键同时设置时不覆盖、不遗漏', async () => {
+  // 四键同时非默认值；每次只把其中一个键退回 1，比较两条完整 56 tick 序列的终态。
+  // 若任一键未进入 config.cycle.profile（被覆盖/遗漏/错误归一化），该键的定向差值会归零。
+  const combo = {
+    cyclePainSensitivity: 0,
+    cycleLutealSensitivity: 1.5,
+    cycleMoodVariability: 1.5,
+    cycleIntimacyVariability: 1.5
+  };
+  const run = await profileSequence(combo);
+  const finalState = run.states.at(-1);
+
+  const cases = [
+    {
+      label: 'pain=0',
+      reference: { ...combo, cyclePainSensitivity: 1 },
+      targets: { physical_comfort: 1, energy: 1 },
+      others: ['stability', 'sensitivity', 'social_drive', 'closeness_need', 'stress'],
+      targetFloor: 0.005
+    },
+    {
+      label: 'luteal=1.5',
+      reference: { ...combo, cycleLutealSensitivity: 1 },
+      targets: { stability: -1, sensitivity: 1 },
+      others: ['energy', 'social_drive', 'closeness_need', 'physical_comfort', 'stress'],
+      targetFloor: 0.003
+    },
+    {
+      label: 'mood=1.5',
+      reference: { ...combo, cycleMoodVariability: 1 },
+      targets: { stability: -1, sensitivity: 1, social_drive: -1 },
+      others: ['energy', 'closeness_need', 'physical_comfort', 'stress'],
+      targetFloor: 0.002
+    },
+    {
+      label: 'intimacy=1.5',
+      reference: { ...combo, cycleIntimacyVariability: 1 },
+      targets: { closeness_need: -1 },
+      others: ['energy', 'stability', 'sensitivity', 'social_drive', 'physical_comfort', 'stress'],
+      targetFloor: 0.003
+    }
+  ];
+
+  for (const item of cases) {
+    const reference = await profileSequence(item.reference);
+    assertDirectionalDiff(
+      moodDiff(reference.states.at(-1), finalState),
+      item,
+      `EB6 ${item.label}（其余三键固定为非默认值）`
+    );
+  }
+});
