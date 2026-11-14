@@ -9,7 +9,7 @@
 ![ESM](https://img.shields.io/badge/Module-ESM-blue?style=flat-square)
 ![Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen?style=flat-square)
 
-**当前版本 0.1.4 · 本地未发布候选** · `apiVersion` 2
+**版本 0.1.4 · 正式发布准备中** · `apiVersion` 2
 
 一个用 **纯 ESM JavaScript、零第三方依赖** 实现的角色状态引擎：把「生理周期 / 睡眠 / 事件压力 / 神经调节 / 情绪 / 行为倾向 / 消息交付策略」拆成 8 个纯函数模块，用确定性随机与单一状态源保证「同输入 → 同输出」。可作为库、HTTP 服务或 WeChatAgent 插件三种形态运行。
 

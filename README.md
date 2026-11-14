@@ -9,7 +9,7 @@ English | [简体中文](./README.zh-CN.md)
 ![ESM](https://img.shields.io/badge/Module-ESM-blue?style=flat-square)
 ![Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen?style=flat-square)
 
-**Current version 0.1.4 · Unpublished Candidate** · `apiVersion` 2
+**Version 0.1.4 · Release candidate** · `apiVersion` 2
 
 A **pure ESM JavaScript engine with zero third-party dependencies**. It splits
 cycles, sleep, event stress, neuromodulation, mood, behavioral tendency and

@@ -72,7 +72,7 @@
 
 - Node 20 的唯一跳过为 **SA-S1**：该运行时不存在 `node:sqlite`，属运行时能力差异，不是测试失败；SA-S2 回退路径用例仍然执行并通过。
 - 打包验证：每个 Node 版本各执行 2 次打包，共 6 次；6 次产物大小均为 164 688 B，SHA-256 均为 `9EEE29FC3B9BD935F4404E7567CBF1B1B77CCC6F4FB7B87106C5A1A9F868DBB9`。
-- **本记录是本机便携运行时验证，不是 GitHub Actions 的真实 CI 记录**；CI 矩阵仍须 Push 后实际执行，见 §8。
+- **本记录是本机便携运行时验证，不是 GitHub Actions 的真实 CI 记录**；CI 侧对应证据见 §8（Run #27）。
 
 ### 2.3 P4 三十轮稳定性验证（2026-11-14，本机）
 
@@ -108,7 +108,7 @@ r2 的 T17 实测 1.22×，门禁为 < 1.2×，因此 **r2 是真实历史失败
 - **P4-C01**：Node 22 r2 T17 波动 1.22× 超限（门禁 <1.2×）。
 - **P4-C02**：Node 22 后半程 4320 步耗时上升，仍需观察。
 - **P4-C03**：Node 20 SA-S1 预期跳过（运行时无 `node:sqlite`）。
-- **P4-C04**：GitHub Actions 跨版本 CI 尚待 Push 后验证。
+- **P4-C04**：GitHub Actions 跨版本 CI 已于 Run #27 验证通过（Node 20 / 22 / 24 与 Node 24 连续十轮，`head_sha = 4821c82…`），P4 裁决仍为 Conditional Pass，原因见 P4-C01 / P4-C02。
 
 ## 3. 用例矩阵 T01–T21
 
@@ -222,13 +222,15 @@ M03 三轮均通过（第 1 轮测试耗时 5 788 ms < 8 000 ms），T17 三轮�
 
 ## 8. 发布证据矩阵
 
-CI 配置位于 `.github/workflows/test.yml`。本地执行与 CI 执行是不同证据；CI 两次连续绿色前，下列 CI 项保持「未完成」。T12 / T17 / M03 的本机计时门禁结果见 §7，不得由本矩阵隐去。
+CI 配置位于 `.github/workflows/test.yml`。本地执行与 CI 执行是不同证据；CI 前两行已于 2026-11-14 取得首次绿色记录（Run #27），仓库原定关闭口径要求两次连续绿色，第 2 次待后续提交确认。T12 / T17 / M03 的本机计时门禁结果见 §7，不得由本矩阵隐去。
 
 | 项 | 状态 | 关闭方式 |
 | --- | --- | --- |
-| Node 20 / 22 矩阵 | **未完成（CI）** | 由 CI Node 20 / 22 / 24 矩阵 job 提供，两次连续绿色后将各版本 pass/fail 与耗时贴入本节；本机 P3 记录见 §2.2，不替代 CI |
-| 全量套件连续 10 轮 | **未完成（CI）** | 由 CI Node 24 稳定性 job 提供；每轮执行 `node --test --test-concurrency=1`，artifact 记录每轮结果与失败次数；T17 只是代理，不能替代。本机 P4 三十轮记录见 §2.3（Conditional Pass），同样不替代 CI |
+| Node 20 / 22 / 24 矩阵 | **已通过（Run #27，2026-11-14）** | GitHub Actions run [#27](https://github.com/YueHua0-0/bio-mood-engine/actions/runs/43586101525)：`completed / success`，`head_sha = 4821c825570c62d4c215f2e2031c037eede0e9c8`；Node 20 / 22 / 24 三个 job 均 success（65 s / 52 s / 77 s）。本机 P3 记录见 §2.2，不替代 CI |
+| 全量套件连续 10 轮 | **已通过（Run #27，2026-11-14）** | 同一 run 的 `10 consecutive full-suite runs (Node 24)` job success（535 s），artifact `stability-node-24` 记录每轮结果与失败次数；T17 只是代理，不能替代。本机 P4 三十轮记录见 §2.3（Conditional Pass），同样不替代 CI |
 | 真实宿主聊天隔离存储 | **N/A（v1 单主会话）** | P-13-20 采用裁决 A 后，跨聊天共享不在 v1 验收范围；隔离语义由 04 §1.1 与宿主 API v2 保证，不另做跨聊天共享状态 E2E |
 | 真机灰度 C1–C3 / 演练 R1–R4 | **未完成** | 依赖真实宿主与观察时间窗口，由 15 的执行记录提供；本文件与 15 §5.2 / §5.3 只作为执行手册，不作为已完成证据 |
 
 注意：`release/` 是本地构建产物，被 `.gitignore` 排除，干净克隆与 CI 中不存在。因此 V15 的字节一致性断言在 CI 中**显式 skip**，不计为通过；该断言只在持有候选包的机器上执行。CI 绿色仅代表其余用例通过。
+
+**CI 与发布 ZIP 的边界**：Run #27 只执行源码测试，未构建、未比对发布包。正式候选包 `release/bio-mood-engine-0.1.4.zip`（164 688 B，SHA-256 `9EEE29FC3B9BD935F4404E7567CBF1B1B77CCC6F4FB7B87106C5A1A9F868DBB9`）与发布候选提交 `4821c825570c62d4c215f2e2031c037eede0e9c8` 的提交树重建结果逐字节一致，这一项是本机对提交树的验证，**不是 CI 的验证结果**。
