@@ -204,12 +204,13 @@ setup(api):
 
 | 键 | 内容 | 上限 | 保留 |
 | --- | --- | --- | --- |
-| `state` | 最新 `CharacterState`（含 `random.master_seed_hex`） | 8 KiB | 仅 1 份 |
+| `state` | 最新 `CharacterState`（含 `schema_version`、`config_version` 与 `random.master_seed_hex`） | 8 KiB | 仅 1 份 |
 | `evlog` | `{event_id,type,time,source_key,intensity}` | 16 KiB | 最近 200 条 / 90 天 |
 | `idem` | `{key, state_version, processed_at}` | 32 KiB | 最近 300 条 / 7 天 |
-| `meta` | `schema_version`、`master_seed_id`、12 条摘要、`config_version` | 24 KiB | 仅 1 份 |
+| `meta` | `schema_migrations`、`state_backup`、最多 12 条 `snapshots` 摘要、`tx_journal`、`rollback_state`、`master_seed_id` 等元数据 | 24 KiB | 仅 1 份 |
 | `cfg` | 规范化配置快照（脱敏，不含种子） | 4 KiB | 仅 1 份 |
 
+- 版本字段职责以实际持久化结构为准：`schema_version` 与 `config_version` 只存于 `state`；`meta.schema_migrations` 记录 schema 迁移历史。配置版本不复制为 `meta.config_version`，`meta` 也不保存第二份 `schema_version`。
 - 键名只允许 `[A-Za-z0-9_-]`、1–64 位；不得出现 `/`、`.`、空格、Unicode。
 - 总占用目标 ≤64 KiB（宿主配额 256 KiB）；淘汰由 `ensureReady` 在事务内统一执行（`meta.snapshots` → `idem` → `evlog`，`state`/`cfg` 永不淘汰），工具层**不再**淘汰后重试；仍超 224 KiB 时底层返回 `STORAGE_FAILED`，工具统一映射为 `DEGRADED`（只读）。
 - 单次工具内 storage 读写合计**遵守 00 §11.0 / 04 §5.3 的 ≤40 次事务上限**，13 不另设数字（W6-1，v1.7.9）。实测预算：`observe` 稳态 19–21 次（`ensureReady` 淘汰 5 读 + 0–3 写；W1–W8b 4 读 7 写；fn 2 读 3 写），首轮触发淘汰时最坏 ≤24 次；`state` 1 读；`tick` 约 5 次。三处写入必须同处一个 04 的事务内，任一失败整体回滚，`state_version` 不变（管理动作是例外，见 §5.9：走 04 §6 的 B 方案直写，不整体回滚、失败写 `recovery_required`）。

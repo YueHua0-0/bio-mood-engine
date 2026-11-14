@@ -45,13 +45,13 @@
 
 | 项 | 实测 | 限额 |
 | --- | --- | --- |
-| ZIP | 157 587 B | ≤8 MiB |
-| 解压 | 422 915 B | ≤16 MiB |
-| 单文件 | ≤ 41 653 B | ≤4 MiB |
+| ZIP | 164 688 B | ≤8 MiB |
+| 解压 | 444 250 B | ≤16 MiB |
+| 单文件 | 42 625 B（`lib/storage/repository.mjs`） | ≤4 MiB |
 | 条目 | 53 | — |
-| SHA-256 | `BD9F8722328A927A4D5835E6F5F5684D980E518D6F02D5A8B2F542E028B39DC6` | — |
+| SHA-256 | `9EEE29FC3B9BD935F4404E7567CBF1B1B77CCC6F4FB7B87106C5A1A9F868DBB9` | — |
 
-> 上表为 2026-11-11 对本地未发布候选 `release/bio-mood-engine-0.1.4.zip` 的实测值；它不是已对外发布版本。V15 按 `plugin.json` 的当前版本检查候选包与 `packPlugin()` 输出逐字节一致，不重写任何历史 ZIP。
+> 上表为 2026-11-14 对当前本地未发布候选 `release/bio-mood-engine-0.1.4.zip`（P1 文本 EOL 归一化修复后重建）的实测值；它不是已对外发布版本。2026-11-11 的 157 587 B / 422 915 B / `BD9F8722…39DC6` 为历史候选包快照，已被本节取代。V15 按 `plugin.json` 的当前版本检查候选包与 `packPlugin()` 输出逐字节一致，不重写任何历史 ZIP。
 
 - 权限仅 `storage` / `history_read` / `reply`；`configSchema` 13 项（≤24），为「字段名 → Schema」扁平映射，`apiVersion` 为数字 `2`，含 `description`（P-13-08 修正）；Schema 关键词严格落在宿主受限子集内，已移除 `maxItems`（P-13-09）。
 - 入口按官方样例对齐（P-13-10）：`api.registerTool({id, description, parameters, execute(ctx,args)})`，`execute` 仅返回 `{content}`；`hooks` 以宿主单参 `ctx` 调用（`ctx.message` / `ctx.text`）。

@@ -43,14 +43,14 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 
 | 项目 | 要求 |
 | --- | --- |
-| Node.js | **≥ 20**（本仓库实测 `v24.19.0`）。Node 24 下 `node --test tests` 会把目录当模块加载并报 `MODULE_NOT_FOUND`，请使用 `node --test` |
+| Node.js | **≥ 20**（本机 P3 已实测 `v20.20.2` / `v22.23.5` / `v24.19.0`；GitHub Actions 的 20/22/24 矩阵仍待 Push 后验证）。Node 24 下 `node --test tests` 会把目录当模块加载并报 `MODULE_NOT_FOUND`，请使用 `node --test` |
 | 运行时依赖 | **0**，仅用 Node 内置模块；不存在 `node_modules`，不打包依赖 |
 | 模块格式 | ESM（`.mjs`），不支持 `require()`；无 `package.json`，直接按路径导入 |
 | 操作系统 | Windows / macOS / Linux 均可；代码内无平台相关路径与 shell 依赖 |
 | 宿主 | **WeChatAgent 插件 API v2**（`plugin.json` 的 `apiVersion: "2"`），权限：`storage` / `history_read` / `reply` |
 | 文本编码 | UTF-8 / LF；时间一律 UTC ISO 8601 毫秒（`…Z`） |
 
-插件包硬限制：ZIP ≤ 8 MiB、解压 ≤ 16 MiB、单文件 ≤ 4 MiB、条目 ≤ 128、目录层级 ≤ 8。0.1.4 **本地未发布候选包**实测 157 587 B / 解压 422 915 B / 53 条目，SHA-256 `BD9F8722328A927A4D5835E6F5F5684D980E518D6F02D5A8B2F542E028B39DC6`；历史 ZIP 不改写。
+插件包硬限制：ZIP ≤ 8 MiB、解压 ≤ 16 MiB、单文件 ≤ 4 MiB、条目 ≤ 128、目录层级 ≤ 8。0.1.4 **本地未发布候选包**实测 164 688 B / 解压 444 250 B / 53 条目，SHA-256 `9EEE29FC3B9BD935F4404E7567CBF1B1B77CCC6F4FB7B87106C5A1A9F868DBB9`；历史 ZIP 不改写。
 
 ---
 
@@ -162,6 +162,6 @@ bio-mood-engine/
 | `node tools/check-docs.mjs` | PASS —— 只校验路径与用例编号，不校验版本号、用例数量、哈希与发布数据 |
 | 端到端场景 E01–E08 | 8/8 通过（宿主上下文替身，非真实宿主） |
 | 365 天仿真 | 第 1 轮 3 395.2 ms（门禁 < 8 s） |
-| 0.1.4 候选包 | 157 587 B / 解压 422 915 B / 53 条目，包内相对引用可全部解析，V15 逐字节一致 |
+| 0.1.4 候选包 | 164 688 B / 解压 444 250 B / 53 条目，包内相对引用可全部解析，V15 逐字节一致 |
 
 真实宿主跨聊天共享状态 E2E 在 P-13-20 裁决 A 后为 **N/A**：v1 只有一个主写者，不提供跨聊天共享。以下发布证据仍**未完成**，阻塞生产冻结：Node 20 / 22 / 24 CI 矩阵（两次连续绿色未取得）、CI 全量连续 10 轮稳定性（本地三轮不能替代）、真机灰度 C1–C3 与演练 R1–R4。

@@ -4,7 +4,7 @@
 
 ## 1. 安装与 bootstrap
 
-1. 安装本地候选 `release/bio-mood-engine-0.1.4.zip`（**157 587 B**，SHA-256 `BD9F8722…39DC6`），确认未启用时零代码执行；该候选不代表已完成发布验收。
+1. 安装本地候选 `release/bio-mood-engine-0.1.4.zip`（**164 688 B**，解压 444 250 B，SHA-256 `9EEE29FC3B9BD935F4404E7567CBF1B1B77CCC6F4FB7B87106C5A1A9F868DBB9`），确认未启用时零代码执行；该候选不代表已完成发布验收。
 2. 在宿主设置中**同时**预置：
    - `primaryChatId`：**只填一个**主聊天会话 ID（P-13-20 裁决 A）。填写多个会被设置校验拒绝，记录 `FASTCFG_INVALID` 并回退为空主会话（`PRIMARY_UNBOUND`）；不要尝试用多个聊天共享状态。留空表示全部工具降级；
    - `adminActorIds`：管理员 wxid 明文（可带 `wxid_` 前缀，最多 8 个，逗号分隔）；插件内部转哈希，留空表示不修改、沿用上次填写；

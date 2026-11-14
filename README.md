@@ -58,7 +58,7 @@ cycle → sleep → event/stress → regulation → mood → behavior → delive
 
 | Item | Requirement |
 | --- | --- |
-| Node.js | **≥ 20** (only `v24.19.0` executed so far — the 20/22 matrix is still open, see §7). On Node 24, `node --test tests` treats the directory as a module and throws `MODULE_NOT_FOUND`; use `node --test` instead |
+| Node.js | **≥ 20** (local P3 verification has executed **v20.20.2 / v22.23.5 / v24.19.0**; the GitHub Actions 20/22/24 matrix is still open, see §7). On Node 24, `node --test tests` treats the directory as a module and throws `MODULE_NOT_FOUND`; use `node --test` instead |
 | Runtime dependencies | **None.** Node built-ins only; no `node_modules`, nothing bundled |
 | Module format | ESM (`.mjs`), no `require()`; no `package.json`, import by path |
 | OS | Windows / macOS / Linux. No platform-specific paths or shell dependencies |
@@ -70,9 +70,9 @@ Plugin package limits: ZIP ≤ 8 MiB, unpacked ≤ 16 MiB, single file ≤ 4 MiB
 
 Local **unpublished candidate** package (0.1.4):
 
-- **157 587 B** ZIP / **422 915 B** unpacked / **53 entries** / largest file **41 653 B**
-- SHA-256: `BD9F8722328A927A4D5835E6F5F5684D980E518D6F02D5A8B2F542E028B39DC6`
-- Built locally on 2026-11-11; V15 checks that it is byte-identical to
+- **164 688 B** ZIP / **444 250 B** unpacked / **53 entries** / largest file **42 625 B**
+- SHA-256: `9EEE29FC3B9BD935F4404E7567CBF1B1B77CCC6F4FB7B87106C5A1A9F868DBB9`
+- Built locally on 2026-11-14; V15 checks that it is byte-identical to
   `packPlugin()` output. Historical 0.1.3 and earlier ZIPs are left unchanged.
 
 ---
@@ -218,7 +218,9 @@ bio-mood-engine/
 
 ## 7. Current Status
 
-Measured 2026-11-11 on Node `v24.19.0`, Windows, `--test-concurrency=1`.
+Suite runs measured 2026-11-11 on Node `v24.19.0`, Windows, `--test-concurrency=1`.
+The 0.1.4 candidate package row was re-measured on 2026-11-14 after the P1 EOL
+normalization rebuild.
 
 | Item | Result |
 | --- | --- |
@@ -231,7 +233,7 @@ Measured 2026-11-11 on Node `v24.19.0`, Windows, `--test-concurrency=1`.
 | End-to-end scenarios E01–E08 | 8/8 pass (host context harness, not a real host) |
 | State page | read-only, auto-refresh, shows degradation for non-primary chats |
 | 365-day simulation | Run 1: **3 395.2 ms** (gate < 8 s) |
-| 0.1.4 candidate package | 157 587 B ZIP / 422 915 B unpacked / 53 entries; every internal specifier resolves; V15 confirms byte identity with `packPlugin()` |
+| 0.1.4 candidate package | 164 688 B ZIP / 444 250 B unpacked / 53 entries; every internal specifier resolves; V15 confirms byte identity with `packPlugin()` |
 
 Real-host cross-chat shared-state E2E is **N/A** under P-13-20 ruling A: v1 has
 one primary writer and does not offer cross-chat shared state. The following
