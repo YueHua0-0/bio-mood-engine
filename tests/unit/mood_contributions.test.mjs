@@ -889,6 +889,30 @@ test('C2-B T9：closeness_need cycle 渠道 —— CYCLE_GAIN × w_intimacy.init
   assert.equal(out.social_drive, 0);
 });
 
+// C2-B T10：独立数值 oracle —— 预期值由冻结契约手工计算并写死，
+// 不读取生产权重、不读取 CYCLE_GAIN，也不调用 expectedCycleTerms()。
+// 同时覆盖旧四维单次缩放、新五维九条映射及未映射的 stress 维度。
+test('C2-B T10：九维贡献与独立手工数值一致', () => {
+  const v = makeV2Vector({
+    physical_comfort: 0.05, energy: 0.06, sensitivity: -0.02, social_drive: 0.05,
+    pain_load: 0.5, anxiety_delta: 0.3, irritability_delta: 0.2,
+    positive_affect_delta: 0.25, intimacy_need_delta: 0.4
+  });
+  const out = rawCycleContrib(v, 0.5);
+  const rounded = Object.fromEntries(
+    Object.entries(out).map(([key, value]) => [key, round6(value)])
+  );
+  assert.deepEqual(rounded, {
+    physical_comfort: -0.03,
+    energy: 0.006,
+    stability: -0.0264,
+    sensitivity: 0.0204,
+    social_drive: 0.045,
+    stress: 0,
+    closeness_need: 0.06
+  });
+});
+
 // C2-B CT1：九维周期贡献权重与冻结契约一致（Contract Test）
 // 与 T7 计算映射测试互补——T7 用生产权重验证公式；
 // CT1 独立断言生产权重值仍然符合冻结设计参数。
