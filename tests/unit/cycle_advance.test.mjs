@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { CYCLE_PHASES, LIMITS, PHASE_VECTOR_KEYS_V2 } from '../../lib/core/constants.mjs';
+import { CYCLE_MODEL_VERSION, CYCLE_PHASES, LIMITS, PHASE_VECTOR_KEYS_V2 } from '../../lib/core/constants.mjs';
 import { parseTime, toIso } from '../../lib/core/clock.mjs';
 import { createDefaultState, round6, validateState } from '../../lib/core/models.mjs';
 import { RandomProvider } from '../../lib/core/random.mjs';
@@ -541,6 +541,34 @@ test('降级：previous 缺字段时省略整个 derived 键并追加 MISSING_CY
     assert.equal(result.state.phase, 'menstrual_like');
     assert.equal(result.state.cycle_day, 1);
   }
+});
+
+test('C2-C cycle 版本：新旧输入计算、降级输出与诊断统一为 2', () => {
+  assert.equal(CYCLE_MODEL_VERSION, 2);
+  for (const previousVersion of [1, 2]) {
+    const previous = makeCycle({ model_version: previousVersion });
+    const result = updateCycle({
+      previous,
+      inputs: {},
+      now: atHours(1),
+      rng: provider().stream('cycle:0'),
+      config: {}
+    });
+    assert.equal(previous.model_version, previousVersion, '计算不得回写 previous 的历史版本');
+    assert.equal(result.state.model_version, 2);
+    assert.equal(result.diagnostics.model_version, 2);
+  }
+
+  const degraded = updateCycle({
+    previous: null,
+    inputs: {},
+    now: START,
+    rng: provider().stream('cycle:0'),
+    config: {}
+  });
+  assert.ok(degraded.warnings.includes('MISSING_CYCLE_DATA'));
+  assert.equal(degraded.state.model_version, 2);
+  assert.equal(degraded.diagnostics.model_version, 2);
 });
 
 test('ModuleResult 形状：完整字段 + diagnostics 固定值 + derived 九维向量（v1.7.14 周期扩展）', () => {

@@ -375,8 +375,8 @@ test('C2-D D9：写回状态通过 validateState，且版本升级不外溢到�
   const fixtureOut = runChain(loadValidState());
   assert.doesNotThrow(() => validateState(fixtureOut.state));
   assert.equal(fixtureOut.state.mood.model_version, 2);
-  // fixture 基线为 v1：mood 之外的模块保留各自 previous 版本，证明升级不外溢
-  assert.equal(fixtureOut.state.cycle.model_version, 1);
+  // cycle / mood 的旧状态进入当前九维计算后均升级为 v2；其他模块版本不外溢。
+  assert.equal(fixtureOut.state.cycle.model_version, 2);
   assert.equal(fixtureOut.state.stress.model_version, 1);
   assert.equal(fixtureOut.state.regulation.model_version, 1);
 
