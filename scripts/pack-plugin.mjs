@@ -32,6 +32,8 @@ const LIMITS = Object.freeze({
 });
 const EXCLUDE_DIRS = new Set(['node_modules', 'tests', 'test', '__tests__', '.git', '.cache']);
 const EXCLUDE_EXT = new Set(['.map', '.log', '.snap', '.tmp']);
+/** 文本类扩展名：写入 ZIP 前统一换行，产物不随检出/编辑器状态变化（P-15-06）。 */
+const TEXT_EXT = new Set(['.mjs', '.js', '.json', '.md', '.html', '.css']);
 /** 适配层真正依赖的根 `lib` 运行时目录（`lib/api` 不随插件发布）。 */
 const RUNTIME_LIB_DIRS = Object.freeze(['core', 'modules', 'storage']);
 
@@ -83,6 +85,15 @@ function included(name) {
   if (name.startsWith('ui/')) return true;
   if (name.startsWith('lib/')) return true;
   return false;
+}
+
+/** ZIP 内的文本条目统一为 LF；二进制条目原样打包。 */
+function normalizeEol(name, data) {
+  const dot = name.lastIndexOf('.');
+  const ext = dot === -1 ? '' : name.slice(dot);
+  if (!TEXT_EXT.has(ext)) return data;
+  const text = data.toString('utf8');
+  return text.includes('\r\n') ? Buffer.from(text.replace(/\r\n/g, '\n'), 'utf8') : data;
 }
 
 const CRC_TABLE = (() => {
@@ -185,7 +196,7 @@ export async function packPlugin({ source = DEFAULT_SOURCE, version = null } = {
   for (const file of files) {
     if (seen.has(file.name)) throw new Error(`duplicate entry in package: ${file.name}`);
     seen.add(file.name);
-    let data = await readFile(file.full);
+    let data = normalizeEol(file.name, await readFile(file.full));
     if (version && file.name === 'plugin.json') {
       const manifest = JSON.parse(data.toString('utf8'));
       manifest.version = version;
